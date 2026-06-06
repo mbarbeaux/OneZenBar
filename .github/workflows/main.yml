@@ -1,0 +1,105 @@
+name: Main
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+env:
+  HUSKY: 0
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          # ShipIt reads the full Conventional Commits history to compute the version
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Generate changelog
+        # GitFlow merge commits are skipped (--skip-merge-commit); release-worthy
+        # Conventional Commits merged from release/* or hotfix/* drive the version bump.
+        run: dotnet shipit --mode local --allow-branch main --skip-merge-commit
+
+      - name: Commit changelog
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md is up to date — nothing to release."
+            echo "released=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          version=$(grep -m1 -oE '^## [0-9]+\.[0-9]+\.[0-9]+[^ ]*' CHANGELOG.md | cut -d' ' -f2)
+
+          # Commit through the GitHub API (createCommitOnBranch) instead of `git push`:
+          # the commit is signed by GitHub and shows as Verified.
+          oid=$(gh api graphql \
+            -f query='mutation ($input: CreateCommitOnBranchInput!) {
+              createCommitOnBranch(input: $input) { commit { oid } }
+            }' \
+            -F "input[branch][repositoryNameWithOwner]=$GITHUB_REPOSITORY" \
+            -F "input[branch][branchName]=main" \
+            -F "input[expectedHeadOid]=$(git rev-parse HEAD)" \
+            -F "input[message][headline]=chore: release ${version}" \
+            -F "input[fileChanges][additions][][path]=CHANGELOG.md" \
+            -F "input[fileChanges][additions][][contents]=$(base64 -w0 CHANGELOG.md)" \
+            --jq '.data.createCommitOnBranch.commit.oid')
+
+          echo "Committed 'chore: release ${version}' to main (${oid})."
+          {
+            echo "released=true"
+            echo "version=${version}"
+            echo "oid=${oid}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Tag release
+        if: steps.release.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+          OID: ${{ steps.release.outputs.oid }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" \
+            -f ref="refs/tags/v${VERSION}" \
+            -f sha="$OID"
+          echo "Tagged v${VERSION} at ${OID}."
+
+      - name: Fast-forward develop
+        if: steps.release.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.release.outputs.version }}
+          OID: ${{ steps.release.outputs.oid }}
+        run: |
+          # Bring develop up to date with main without a merge commit. A non-forced
+          # ref update only succeeds as a fast-forward, so signed history is never
+          # rewritten. If develop has diverged, rebase it locally instead (commits
+          # rebased in CI would be unsigned).
+          if gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/develop" \
+               -f sha="$OID" -F force=false; then
+            echo "develop fast-forwarded to v${VERSION}."
+          else
+            echo "::warning::develop has diverged from main and cannot be fast-forwarded. Rebase it locally: git fetch && git checkout develop && git rebase origin/main && git push --force-with-lease"
+          fi
