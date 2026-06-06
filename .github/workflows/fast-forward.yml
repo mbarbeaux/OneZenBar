@@ -1,0 +1,30 @@
+name: Fast-forward
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  fast-forward:
+    # Run only for `/fast-forward` comments posted on a pull request by the repo owner
+    if: |
+      github.event.issue.pull_request
+      && contains(github.event.comment.body, '/fast-forward')
+      && github.event.comment.author_association == 'OWNER'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Fast-forward the target branch
+        uses: sequoia-pgp/fast-forward@v1
+        with:
+          merge: true
+          comment: always
+          # A PAT is required (not the default GITHUB_TOKEN): pushes made with
+          # GITHUB_TOKEN do not trigger workflows, so main.yml (changelog, tag,
+          # develop fast-forward) and develop.yml would never run after the merge.
+          github_token: ${{ secrets.FAST_FORWARD_PAT }}
