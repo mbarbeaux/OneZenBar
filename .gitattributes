@@ -1,0 +1,7 @@
+# Normalize every text file to LF, both in the repository and in every
+# working tree, regardless of OS (overrides core.autocrlf on dev machines).
+* text=auto eol=lf
+
+# Visual Studio solution files keep their conventional CRLF (+ UTF-8 BOM,
+# see .editorconfig) — forced, so still identical on every OS.
+*.sln text eol=crlf

@@ -1,0 +1,4 @@
+# Toolchain versions for this project — install everything with `mise install`.
+# Keep the dotnet version in sync with global.json (used by CI and non-mise setups).
+[tools]
+dotnet = "10.0.300"

@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- Enforce .editorconfig rules (including the IDE0073 license header) at build time -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <!-- Install the Husky.Net git hooks on every dev machine at first restore (skipped in CI via HUSKY=0) -->
+  <Target Name="InstallGitHooks" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != '0' AND Exists('$(MSBuildThisFileDirectory).git')">
+    <Exec Command="dotnet tool restore" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="true" StandardOutputImportance="low" />
+    <Exec Command="dotnet husky install" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="true" StandardOutputImportance="low" />
+  </Target>
+
+</Project>

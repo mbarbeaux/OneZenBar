@@ -1,0 +1,18 @@
+{
+   "$schema": "https://alirezanet.github.io/Husky.Net/schema.json",
+   "tasks": [
+      {
+         "name": "check-encoding",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "husky", "exec", ".husky/csx/check-encoding.csx", "--args", "${staged}" ]
+      },
+      {
+         "name": "check-format",
+         "group": "pre-commit",
+         "command": "dotnet",
+         "args": [ "format", "--verify-no-changes", "--severity", "error", "--include", "${staged}" ],
+         "include": [ "**/*.cs", "**/*.vb" ]
+      }
+   ]
+}
