@@ -27,4 +27,8 @@ jobs:
           # A PAT is required (not the default GITHUB_TOKEN): pushes made with
           # GITHUB_TOKEN do not trigger workflows, so main.yml (changelog, tag,
           # develop fast-forward) and develop.yml would never run after the merge.
+          # Required fine-grained PAT permissions: Contents read/write (push)
+          # AND Pull requests read/write (read PR metadata, post the result
+          # comment) — without the latter the PR fetch returns nothing and the
+          # action fails with "credential url cannot be parsed".
           github_token: ${{ secrets.FAST_FORWARD_PAT }}
