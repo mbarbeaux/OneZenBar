@@ -11,7 +11,11 @@
     <AssemblyName>Sample.Widget</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
+    <!-- Compiled against SDK 26100 (the only one on CI runner images and modern VS installs),
+         but RUNS on Windows 10 2004+ (TargetPlatformMinVersion). APIs introduced after 19041
+         compile fine yet CRASH at runtime on older systems: guard every such call with
+         ApiCompatibility (see ApiCompatibility.cs). -->
+    <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -101,6 +105,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ApiCompatibility.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>

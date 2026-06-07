@@ -8,6 +8,7 @@
 - Solution: `Sample.slnx` (XML solution format — readable, no GUIDs, merge-friendly)
 - Projects: `src/SampleClasslib` (netstandard2.0, AnyCPU) and `src/Sample.Widget` (UWP Xbox Game Bar widget, old-style csproj, x86/x64/ARM64 only)
 - **`Sample.Widget` builds ONLY on Windows with the Visual Studio UWP workload** (Windows 10 SDK 19041). It is excluded from the "Any CPU" solution platform in `Sample.slnx`, so `dotnet build`/`restore`/`format`/`test` keep working on macOS/Linux and in CI (the project is skipped). Its XAML targets import is guarded by `Exists()` so the project still evaluates everywhere. The appx package version is stamped from MinVer by the `StampAppxManifestVersion` target when building with `/p:StampPackageVersion=true` (Major.Minor.Patch.0 — appx forbids prerelease suffixes); `Package.appxmanifest` Identity Name/Publisher are placeholders overwritten by the Store association.
+- **Widget API compatibility rule**: the widget compiles against Windows SDK 26100 (`TargetPlatformVersion`) but must run on Windows 10 2004 (`TargetPlatformMinVersion` 10.0.19041.0 = UniversalApiContract v10). Any API introduced after build 19041 compiles but **crashes at runtime** on older systems — ALWAYS guard such calls with the `ApiCompatibility` helper (`src/Sample.Widget/ApiCompatibility.cs`, wraps `ApiInformation`) and provide a 19041 fallback. Check the "Windows requirements" section on the API's Microsoft Learn page; contract map: 19041→10 (baseline, no guard), 22000→14, 22621→15, 26100→19.
 
 ## Commands
 
