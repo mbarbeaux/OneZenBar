@@ -10,6 +10,9 @@ env:
   HUSKY: 0
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
+  # Run every JavaScript action on Node 24 (the default from 2026-06-16): actions that only
+  # support the deprecated Node 20 fail loudly here instead of silently running on it
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -110,7 +113,7 @@ jobs:
           global-json-file: global.json
 
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
 
       - name: Restore
         run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal

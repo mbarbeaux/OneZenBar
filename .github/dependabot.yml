@@ -1,0 +1,17 @@
+# Keeps GitHub Actions versions current: Dependabot opens a PR on develop whenever an action
+# used by the workflows publishes a new major (e.g. the Node 24 compatibility waves).
+# Merge those PRs like any other: /fast-forward comment once the quality gate is green.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      # Conventional Commits type expected by the commit-msg hook and ShipIt
+      prefix: ci
+    groups:
+      # One PR bundling all action bumps instead of one PR per action
+      github-actions:
+        patterns:
+          - "*"

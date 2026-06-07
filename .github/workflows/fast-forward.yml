@@ -5,6 +5,11 @@ on:
     types:
       - created
 
+env:
+  # Run every JavaScript action on Node 24 (the default from 2026-06-16) — the sequoia-pgp
+  # action is Docker-based and unaffected, but any future JS action added here will comply
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   fast-forward:
     # Run only for comments STARTING with `/fast-forward`, posted by the repo owner on an OPEN pull request.

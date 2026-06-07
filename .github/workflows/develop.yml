@@ -9,6 +9,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Run every JavaScript action on Node 24 (the default from 2026-06-16).
+  # Note: does NOT propagate to the reusable quality-gate.yml, which sets it itself.
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     uses: ./.github/workflows/quality-gate.yml
