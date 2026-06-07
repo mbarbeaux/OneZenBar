@@ -21,11 +21,12 @@
                         Foreground="#66FFFFFF"
                         Glyph="&#xE7BA;" />
             <TextBlock
+                        x:Name="LibraryVersionText"
                         HorizontalAlignment="Center"
                         FontSize="16"
                         FontWeight="SemiBold"
                         Foreground="#FFFFFF"
-                        Text="Real primary widget" />
+                        d:Text="SampleClasslib 0.0.0" />
             <TextBlock
                         HorizontalAlignment="Center"
                         Foreground="#99FFFFFF"

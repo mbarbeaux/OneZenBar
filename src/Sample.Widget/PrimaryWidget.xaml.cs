@@ -1,5 +1,6 @@
 // Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
 
+using SampleClasslib;
 using Windows.UI.Xaml.Controls;
 
 namespace Sample.Widget
@@ -12,6 +13,7 @@ namespace Sample.Widget
         public PrimaryWidget()
         {
             InitializeComponent();
+            LibraryVersionText.Text = "SampleClasslib " + LibraryInfo.GetVersion();
         }
     }
 }
