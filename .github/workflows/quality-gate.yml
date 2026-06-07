@@ -15,6 +15,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      # Needed to post/update the coverage comment on PRs
+      pull-requests: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -39,4 +44,21 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-build --configuration Release
+        # GitHubActionsTestLogger: failed tests become annotations + a report in the job summary.
+        # coverlet.msbuild: fails this step if line coverage drops below the Threshold set in the test csproj.
+        run: dotnet test --no-build --configuration Release --logger GitHubActions /p:CollectCoverage=true
+
+      - name: Coverage report
+        # Runs even when the Test step failed (tests red or coverage below threshold):
+        # the cobertura file is written before the threshold check, and the report is most useful exactly then.
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet reportgenerator -reports:"tests/**/coverage.cobertura.xml" -targetdir:coverage-report "-reporttypes:MarkdownSummaryGithub"
+          cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post coverage comment on PR
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage
+          path: coverage-report/SummaryGithub.md
