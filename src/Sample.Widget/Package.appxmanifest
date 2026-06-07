@@ -117,7 +117,4 @@
     </Extension>
   </Extensions>
 
-  <Capabilities>
-    <Capability Name="internetClient" />
-  </Capabilities>
 </Package>
