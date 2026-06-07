@@ -1,9 +1,9 @@
 name: Build
 
+# pull_request only (no push trigger on feature branches): a push to a branch with an open PR
+# would otherwise run the gate twice — and the PR run is the valuable one, since it validates
+# the MERGE result against the target branch. Open a PR (draft is fine) to get CI on a branch.
 on:
-  push:
-    branches:
-      - feature/**
   pull_request:
     branches:
       - develop
