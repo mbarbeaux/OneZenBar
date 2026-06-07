@@ -16,8 +16,16 @@ public static class LibraryInfo
     /// <returns>The library version, or "unknown" when the attribute is missing.</returns>
     public static string GetVersion()
     {
-        AssemblyInformationalVersionAttribute? attribute = typeof(LibraryInfo).Assembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        return GetVersion(typeof(LibraryInfo).Assembly);
+    }
+
+    /// <summary>
+    /// Testable core of <see cref="GetVersion()"/>: reads the informational version of the given assembly.
+    /// </summary>
+    internal static string GetVersion(Assembly assembly)
+    {
+        AssemblyInformationalVersionAttribute? attribute =
+            assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
         return attribute?.InformationalVersion ?? "unknown";
     }
 }
