@@ -6,6 +6,8 @@
 
 - .NET SDK 10.0 — version pinned in **both** `mise.toml` (for [mise](https://mise.jdx.dev/) users, `mise install` sets everything up) and `global.json` (for CI and non-mise setups). Keep the two in sync when upgrading.
 - Solution: `Sample.slnx` (XML solution format — readable, no GUIDs, merge-friendly)
+- Projects: `src/SampleClasslib` (netstandard2.0, AnyCPU) and `src/Sample.Widget` (UWP Xbox Game Bar widget, old-style csproj, x86/x64/ARM64 only)
+- **`Sample.Widget` builds ONLY on Windows with the Visual Studio UWP workload** (Windows 10 SDK 19041). It is excluded from the "Any CPU" solution platform in `Sample.slnx`, so `dotnet build`/`restore`/`format`/`test` keep working on macOS/Linux and in CI (the project is skipped). Its XAML targets import is guarded by `Exists()` so the project still evaluates everywhere. The appx package version is stamped from MinVer by the `StampAppxManifestVersion` target when building with `/p:StampPackageVersion=true` (Major.Minor.Patch.0 — appx forbids prerelease suffixes); `Package.appxmanifest` Identity Name/Publisher are placeholders overwritten by the Store association.
 
 ## Commands
 

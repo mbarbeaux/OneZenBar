@@ -3,11 +3,24 @@
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
     <Platform Name="x86" />
+    <Platform Name="ARM64" />
   </Configurations>
   <Folder Name="/src/">
-    <Project Path="src/SampleClasslib/SampleClasslib.csproj" />
+    <!-- UWP project: only buildable on Windows with the Visual Studio UWP workload, and only for
+         concrete architectures — excluded from "Any CPU" so `dotnet build` keeps working everywhere. -->
+    <Project Path="src/Sample.Widget/Sample.Widget.csproj">
+      <Build Solution="*|Any CPU" Project="false" />
+      <Platform Solution="*|x64" Project="x64" />
+      <Platform Solution="*|x86" Project="x86" />
+      <Platform Solution="*|ARM64" Project="ARM64" />
+    </Project>
+    <Project Path="src/SampleClasslib/SampleClasslib.csproj">
+      <Platform Project="Any CPU" />
+    </Project>
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/SampleClasslib.Tests/SampleClasslib.Tests.csproj" />
+    <Project Path="tests/SampleClasslib.Tests/SampleClasslib.Tests.csproj">
+      <Platform Project="Any CPU" />
+    </Project>
   </Folder>
 </Solution>
