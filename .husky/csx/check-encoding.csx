@@ -1,7 +1,6 @@
 // Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
 
-// Verifies that every staged text file is UTF-8 encoded, without BOM
-// (except *.sln, which Visual Studio writes with a UTF-8 BOM — see .editorconfig).
+// Verifies that every staged text file is UTF-8 encoded, without BOM.
 // Run by the pre-commit hook via Husky.Net: file paths arrive in Args (${staged}).
 
 using System.Text;
@@ -43,9 +42,9 @@ foreach (var file in Args)
     }
 
     var hasBom = StartsWith(bytes, 0xEF, 0xBB, 0xBF);
-    if (hasBom && !file.EndsWith(".sln", StringComparison.OrdinalIgnoreCase))
+    if (hasBom)
     {
-        Fail(file, "has a UTF-8 BOM (charset = utf-8 means no BOM; only *.sln keeps one)");
+        Fail(file, "has a UTF-8 BOM (charset = utf-8 means no BOM)");
         continue;
     }
 

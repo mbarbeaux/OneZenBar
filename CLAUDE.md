@@ -5,7 +5,7 @@
 ## Stack
 
 - .NET SDK 10.0 — version pinned in **both** `mise.toml` (for [mise](https://mise.jdx.dev/) users, `mise install` sets everything up) and `global.json` (for CI and non-mise setups). Keep the two in sync when upgrading.
-- Solution: `Sample.sln` (empty for now)
+- Solution: `Sample.slnx` (XML solution format — readable, no GUIDs, merge-friendly)
 
 ## Commands
 
@@ -25,8 +25,8 @@ dotnet format         # Format code (the pre-commit hook runs this with --verify
 - **English only across the entire project**: documentation, comments, identifiers (variables, functions, classes, namespaces), commit messages, config files. No French anywhere in the repository.
 - Commit messages **must follow Conventional Commits** — the `commit-msg` hook runs `dotnet commit-linter` (EasyBuild.CommitLinter, default rules: `feat`, `fix`, `ci`, `chore`, `docs`, `test`, `style`, `refactor`, `perf`, `revert`, `build`).
 - Code style is defined in `.editorconfig` — always follow it. The pre-commit hook rejects staged `.cs`/`.vb` files that `dotnet format --verify-no-changes --severity error` would change; run `dotnet format` before committing.
-- **Encoding**: all text files are UTF-8 without BOM (`.sln` files keep their UTF-8 BOM). Enforced at commit time by a Husky.Net pre-commit hook (`.husky/csx/check-encoding.csx`), installed automatically at first restore/build, or manually with `dotnet tool restore && dotnet husky install`.
-- **Line endings**: LF everywhere on every OS (`.sln` files are CRLF) — normalized by `.gitattributes`, don't override it locally.
+- **Encoding**: all text files are UTF-8 without BOM. Enforced at commit time by a Husky.Net pre-commit hook (`.husky/csx/check-encoding.csx`), installed automatically at first restore/build, or manually with `dotnet tool restore && dotnet husky install`.
+- **Line endings**: LF everywhere on every OS — normalized by `.gitattributes`, don't override it locally.
 - **License**: project is GPL-3.0-or-later. Every `.cs` file MUST start with this header (the build fails otherwise — rule IDE0073):
   ```csharp
   // Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
