@@ -22,6 +22,9 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    # Like env, secrets do NOT propagate to reusable workflows — required for the MSIX signing
+    # secrets (SIGNING_CERTIFICATE_*) read inside the quality gate
+    secrets: inherit
 
   # Publishes the interactive coverage report (with history/trend charts) to GitHub Pages.
   # Gated behind the COVERAGE_PAGES_ENABLED repository variable: set it to 'true' once the
