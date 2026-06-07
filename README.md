@@ -1,5 +1,7 @@
 # Sample
 
+[![Build (develop)](https://github.com/mbarbeaux/sample/actions/workflows/develop.yml/badge.svg?branch=develop)](https://github.com/mbarbeaux/sample/actions/workflows/develop.yml?query=branch%3Adevelop)
+[![Release (main)](https://github.com/mbarbeaux/sample/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/mbarbeaux/sample/actions/workflows/main.yml?query=branch%3Amain)
 [![Line coverage](https://mbarbeaux.github.io/sample/badge_linecoverage.svg)](https://mbarbeaux.github.io/sample/)
 
 .NET 10 project — basic skeleton.
