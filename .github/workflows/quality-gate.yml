@@ -36,6 +36,11 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      - name: Restore dotnet tools
+        # ReportGenerator comes from the local tools manifest; the automatic restore at build
+        # time (InstallGitHooks target in Directory.Build.props) is disabled in CI by HUSKY=0
+        run: dotnet tool restore
+
       - name: Check formatting
         # Same check as the local pre-commit hook (style, .editorconfig, license headers)
         run: dotnet format --verify-no-changes --severity error --no-restore
