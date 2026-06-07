@@ -83,3 +83,50 @@ jobs:
         with:
           header: coverage
           path: coverage-report/SummaryGithub.md
+
+  # Builds the UWP Xbox Game Bar widget — only possible on Windows (VS UWP workload).
+  # Produces one unsigned sideload .msixbundle containing the x86, x64 and ARM64 flavors,
+  # with the appx version stamped from MinVer (StampPackageVersion).
+  widget:
+    runs-on: windows-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          # MinVer computes the version from the latest reachable v* tag — needs full history and tags
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        # The widget references SampleClasslib (SDK-style project): MSBuild resolves the .NET SDK
+        # pinned in global.json through the dotnet on PATH
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Restore
+        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+
+      - name: Build MSIX bundle (x86 + x64 + ARM64)
+        run: >
+          msbuild src/Sample.Widget/Sample.Widget.csproj
+          /p:Configuration=Release
+          /p:Platform=x64
+          /p:AppxBundlePlatforms="x86|x64|ARM64"
+          /p:AppxBundle=Always
+          /p:UapAppxPackageBuildMode=SideloadOnly
+          /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
+          /p:StampPackageVersion=true
+          /verbosity:minimal
+
+      - name: Upload MSIX artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: Sample.Widget-msix
+          path: AppPackages/**/*.msixbundle
