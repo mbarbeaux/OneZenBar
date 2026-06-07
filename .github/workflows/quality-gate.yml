@@ -90,8 +90,13 @@ jobs:
           path: coverage-report/SummaryGithub.md
 
   # Builds the UWP Xbox Game Bar widget — only possible on Windows (VS UWP workload).
-  # Produces one unsigned sideload .msixbundle containing the x86, x64 and ARM64 flavors,
-  # with the appx version stamped from MinVer (StampPackageVersion).
+  # Produces one sideload .msixbundle containing the x86, x64 and ARM64 flavors, with the
+  # appx version stamped from MinVer (StampPackageVersion). The bundle is SIGNED with the
+  # self-signed dev certificate when the SIGNING_CERTIFICATE_* secrets are present (their
+  # absence — e.g. before setup, or on Dependabot PRs which cannot read secrets — gracefully
+  # falls back to an unsigned bundle). The certificate Subject must match the manifest
+  # Publisher (CN=Michael Barbeaux), and target machines must trust the public .cer
+  # (LocalMachine\TrustedPeople) for the bundle to install.
   widget:
     # windows-2025-vs2026: Visual Studio 2026 (MSBuild 18) is required — VS 2022's MSBuild 17
     # cannot load the .NET 10 SDK pinned in global.json (needed to build SampleClasslib)
@@ -99,6 +104,10 @@ jobs:
 
     permissions:
       contents: read
+
+    env:
+      # Secrets are unreadable in step `if:` expressions — exposed here as a job-level flag
+      HAS_SIGNING_CERT: ${{ secrets.SIGNING_CERTIFICATE_BASE64 != '' }}
 
     steps:
       - name: Checkout
@@ -120,7 +129,19 @@ jobs:
       - name: Restore
         run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
+      - name: Decode signing certificate
+        if: env.HAS_SIGNING_CERT == 'true'
+        shell: pwsh
+        env:
+          SIGNING_CERT_B64: ${{ secrets.SIGNING_CERTIFICATE_BASE64 }}
+        run: '[IO.File]::WriteAllBytes("$env:RUNNER_TEMP\signing.pfx", [Convert]::FromBase64String($env:SIGNING_CERT_B64))'
+
       - name: Build MSIX bundle (x86 + x64 + ARM64)
+        shell: pwsh
+        env:
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+        # Signing properties are only injected when the certificate secrets exist; the
+        # timestamp server keeps the signature valid after the certificate itself expires
         run: >
           msbuild src/Sample.Widget/Sample.Widget.csproj
           /p:Configuration=Release
@@ -130,6 +151,8 @@ jobs:
           /p:UapAppxPackageBuildMode=SideloadOnly
           /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
           /p:StampPackageVersion=true
+          /p:AppxPackageSigningEnabled=${{ env.HAS_SIGNING_CERT }}
+          ${{ env.HAS_SIGNING_CERT == 'true' && format('/p:PackageCertificateKeyFile={0}\signing.pfx /p:PackageCertificatePassword=$env:SIGNING_CERT_PASSWORD /p:AppxPackageSigningTimestampServerUrl=http://timestamp.digicert.com', runner.temp) || '' }}
           /verbosity:minimal
 
       - name: Upload MSIX artifact
