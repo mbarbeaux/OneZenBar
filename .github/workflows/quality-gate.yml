@@ -64,7 +64,7 @@ jobs:
       - name: Upload coverage report artifact
         # Full interactive HTML report (per-file source view with line-by-line coverage highlighting)
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report
           path: coverage-report
@@ -72,14 +72,14 @@ jobs:
       - name: Upload coverage data
         # Raw cobertura files for downstream jobs (e.g. the GitHub Pages publication in develop.yml)
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-data
           path: tests/**/coverage.cobertura.xml
 
       - name: Post coverage comment on PR
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: coverage
           path: coverage-report/SummaryGithub.md

@@ -53,7 +53,7 @@ jobs:
         run: dotnet tool restore
 
       - name: Download coverage data
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: coverage-data
           path: coverage-data
@@ -61,7 +61,7 @@ jobs:
       - name: Restore coverage history
         # Each run restores the most recent history (restore-keys prefix match)
         # and saves an updated snapshot under a fresh key (run id)
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: coverage-history
           key: coverage-history-${{ github.run_id }}
@@ -73,13 +73,13 @@ jobs:
         run: dotnet reportgenerator -reports:"coverage-data/**/coverage.cobertura.xml" -targetdir:coverage-site "-reporttypes:Html;Badges" -historydir:coverage-history
 
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: coverage-site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
