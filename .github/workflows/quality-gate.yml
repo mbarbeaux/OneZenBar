@@ -1,6 +1,6 @@
 name: Quality gate
 
-# Reusable quality gate shared by build.yml, develop.yml and release.yml.
+# Reusable quality gate shared by build.yml and develop.yml.
 # Not triggered directly — callers invoke it with `uses: ./.github/workflows/quality-gate.yml`.
 on:
   workflow_call:
