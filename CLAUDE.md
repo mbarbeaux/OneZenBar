@@ -1,6 +1,6 @@
 # Sample
 
-.NET 10 project — basic skeleton, no source code yet.
+.NET 10 project.
 
 ## Stack
 
