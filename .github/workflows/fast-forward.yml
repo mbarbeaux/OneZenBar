@@ -7,10 +7,15 @@ on:
 
 jobs:
   fast-forward:
-    # Run only for `/fast-forward` comments posted on a pull request by the repo owner
+    # Run only for comments STARTING with `/fast-forward`, posted by the repo owner on an OPEN pull request.
+    # startsWith (not contains!) and the open check both matter: the action posts its result comment through
+    # FAST_FORWARD_PAT (author = owner) and quotes the head commit message — if that message happens to
+    # contain the string "/fast-forward" (e.g. mentioning sequoia-pgp/fast-forward), a contains() match
+    # re-triggers this workflow on the merged PR forever (merge fails -> comment -> trigger -> ...).
     if: |
       github.event.issue.pull_request
-      && contains(github.event.comment.body, '/fast-forward')
+      && github.event.issue.state == 'open'
+      && startsWith(github.event.comment.body, '/fast-forward')
       && github.event.comment.author_association == 'OWNER'
     runs-on: ubuntu-latest
     permissions:
