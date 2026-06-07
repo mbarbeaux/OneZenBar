@@ -7,9 +7,11 @@
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
   IgnorableNamespaces="uap uap3 mp">
 
-  <!-- Identity Name and Publisher are placeholders: both are overwritten by the Microsoft Store
-       association (Project > Publish > Associate App with the Store in Visual Studio), and the
-       Publisher must match the signing certificate subject for sideloaded builds.
+  <!-- Identity and display names below are NEUTRAL DEV PLACEHOLDERS. The real Microsoft Store
+       identity (Partner Center > Product identity) is deliberately kept OUT of source control:
+       CI injects it at build time from the STORE_* secrets (StampAppxStoreIdentity target in
+       the csproj). The dev signing certificate subject equals the injected Publisher, so
+       signing only happens when both the certificate and identity secrets are available.
        Version is stamped at build time from the MinVer-computed version when building with
        /p:StampPackageVersion=true (see the StampAppxManifestVersion target in the csproj). -->
   <Identity

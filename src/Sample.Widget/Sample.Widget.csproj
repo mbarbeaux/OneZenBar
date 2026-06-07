@@ -170,6 +170,39 @@
        on non-Windows machines and CI, where the UWP/XAML toolchain is not installed.
        Building this project requires Windows + Visual Studio with the UWP workload. -->
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets')" />
+  <!-- Injects the Microsoft Store identity into the manifest at build time. The real values
+       (Partner Center > Product identity) are deliberately kept out of source control — the
+       manifest carries neutral dev placeholders and CI passes these properties from the
+       STORE_* secrets. No-op when the properties are absent (local builds, Dependabot). -->
+  <Target Name="StampAppxStoreIdentity"
+          BeforeTargets="BeforeBuild"
+          Condition="'$(AppxIdentityName)' != ''">
+    <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
+             Query="/ns:Package/ns:Identity/@Name"
+             Value="$(AppxIdentityName)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
+             Query="/ns:Package/ns:Identity/@Publisher"
+             Value="$(AppxIdentityPublisher)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
+             Query="/ns:Package/ns:Properties/ns:PublisherDisplayName/text()"
+             Value="$(AppxPublisherDisplayName)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
+             Query="/ns:Package/ns:Properties/ns:DisplayName/text()"
+             Value="$(AppxDisplayName)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
+             Query="/ns:Package/ns:Applications/ns:Application/uap:VisualElements/@DisplayName"
+             Value="$(AppxDisplayName)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;&lt;Namespace Prefix='uap' Uri='http://schemas.microsoft.com/appx/manifest/uap/windows10' /&gt;" />
+    <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
+             Query="/ns:Package/ns:Applications/ns:Application/ns:Extensions/uap3:Extension/uap3:AppExtension/@DisplayName"
+             Value="$(AppxDisplayName)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;&lt;Namespace Prefix='uap3' Uri='http://schemas.microsoft.com/appx/manifest/uap/windows10/3' /&gt;" />
+    <Message Importance="high" Text="Store identity injected into Package.appxmanifest (values masked)" />
+  </Target>
   <!-- Stamps the appx package version from the MinVer-computed version (vX.Y.Z git tags created
        by ShipIt). MinVer cannot run in this old-style project (MINVER0001), so the version is
        queried from the SDK-style SampleClasslib via its ReportMinVerBaseVersion target (defined

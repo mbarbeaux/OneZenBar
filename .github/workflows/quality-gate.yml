@@ -106,8 +106,12 @@ jobs:
       contents: read
 
     env:
-      # Secrets are unreadable in step `if:` expressions — exposed here as a job-level flag
-      HAS_SIGNING_CERT: ${{ secrets.SIGNING_CERTIFICATE_BASE64 != '' }}
+      # Secrets are unreadable in step `if:` expressions — exposed here as job-level flags.
+      # The Store identity (kept out of source control) is injected into the manifest when its
+      # secrets exist; signing additionally requires the certificate, whose subject must equal
+      # the injected Publisher — hence CAN_SIGN requiring BOTH groups of secrets.
+      HAS_STORE_IDENTITY: ${{ secrets.STORE_IDENTITY_NAME != '' }}
+      CAN_SIGN: ${{ secrets.SIGNING_CERTIFICATE_BASE64 != '' && secrets.STORE_IDENTITY_NAME != '' }}
 
     steps:
       - name: Checkout
@@ -130,7 +134,7 @@ jobs:
         run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
       - name: Decode signing certificate
-        if: env.HAS_SIGNING_CERT == 'true'
+        if: env.CAN_SIGN == 'true'
         shell: pwsh
         env:
           SIGNING_CERT_B64: ${{ secrets.SIGNING_CERTIFICATE_BASE64 }}
@@ -140,8 +144,12 @@ jobs:
         shell: pwsh
         env:
           SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
-        # Signing properties are only injected when the certificate secrets exist; the
-        # timestamp server keeps the signature valid after the certificate itself expires
+          STORE_IDENTITY_NAME: ${{ secrets.STORE_IDENTITY_NAME }}
+          STORE_IDENTITY_PUBLISHER: ${{ secrets.STORE_IDENTITY_PUBLISHER }}
+          STORE_PUBLISHER_DISPLAY_NAME: ${{ secrets.STORE_PUBLISHER_DISPLAY_NAME }}
+          STORE_APP_DISPLAY_NAME: ${{ secrets.STORE_APP_DISPLAY_NAME }}
+        # The Store identity and signing properties are only injected when their secrets exist;
+        # the timestamp server keeps the signature valid after the certificate itself expires
         run: >
           msbuild src/Sample.Widget/Sample.Widget.csproj
           /p:Configuration=Release
@@ -151,8 +159,9 @@ jobs:
           /p:UapAppxPackageBuildMode=SideloadOnly
           /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
           /p:StampPackageVersion=true
-          /p:AppxPackageSigningEnabled=${{ env.HAS_SIGNING_CERT }}
-          ${{ env.HAS_SIGNING_CERT == 'true' && format('/p:PackageCertificateKeyFile={0}\signing.pfx /p:PackageCertificatePassword=$env:SIGNING_CERT_PASSWORD /p:AppxPackageSigningTimestampServerUrl=http://timestamp.digicert.com', runner.temp) || '' }}
+          ${{ env.HAS_STORE_IDENTITY == 'true' && '"/p:AppxIdentityName=$env:STORE_IDENTITY_NAME" "/p:AppxIdentityPublisher=$env:STORE_IDENTITY_PUBLISHER" "/p:AppxPublisherDisplayName=$env:STORE_PUBLISHER_DISPLAY_NAME" "/p:AppxDisplayName=$env:STORE_APP_DISPLAY_NAME"' || '' }}
+          /p:AppxPackageSigningEnabled=${{ env.CAN_SIGN }}
+          ${{ env.CAN_SIGN == 'true' && format('/p:PackageCertificateKeyFile={0}\signing.pfx /p:PackageCertificatePassword=$env:SIGNING_CERT_PASSWORD /p:AppxPackageSigningTimestampServerUrl=http://timestamp.digicert.com', runner.temp) || '' }}
           /verbosity:minimal
 
       - name: Upload MSIX artifact
