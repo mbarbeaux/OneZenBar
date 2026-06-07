@@ -9,14 +9,24 @@
   <!-- Versioning: MinVer stamps Version/AssemblyVersion/FileVersion/InformationalVersion
        at build time from the latest reachable git tag (vX.Y.Z, created by ShipIt in CI).
        Builds between releases get a pre-release version with commit height (X.Y.Z-alpha.0.N).
-       Never hardcode version properties in csproj files. -->
+       Never hardcode version properties in csproj files.
+       SDK-style projects only (MINVER0001): the UWP widget gets its version by calling
+       ReportMinVerBaseVersion on SampleClasslib instead (see StampAppxManifestVersion). -->
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="All" Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
   </ItemGroup>
 
   <PropertyGroup>
     <MinVerTagPrefix>v</MinVerTagPrefix>
   </PropertyGroup>
+
+  <!-- Lets non-SDK projects (the UWP widget) query the MinVer-computed base version of an
+       SDK-style project through the MSBuild task: returns "Major.Minor.Patch". -->
+  <Target Name="ReportMinVerBaseVersion" DependsOnTargets="MinVer" Returns="@(MinVerBaseVersion)" Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
+    <ItemGroup>
+      <MinVerBaseVersion Include="$(MinVerMajor).$(MinVerMinor).$(MinVerPatch)" />
+    </ItemGroup>
+  </Target>
 
   <!-- Install the Husky.Net git hooks on every dev machine at first restore (skipped in CI via HUSKY=0) -->
   <Target Name="InstallGitHooks" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != '0' AND Exists('$(MSBuildThisFileDirectory).git')">

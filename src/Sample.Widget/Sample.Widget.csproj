@@ -166,17 +166,26 @@
        Building this project requires Windows + Visual Studio with the UWP workload. -->
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets')" />
   <!-- Stamps the appx package version from the MinVer-computed version (vX.Y.Z git tags created
-       by ShipIt). Opt-in via /p:StampPackageVersion=true (used by CI packaging) so local builds
-       do not dirty Package.appxmanifest. The appx version must be 4 numeric parts with a zero
-       revision (no prerelease suffix), hence Major.Minor.Patch.0. -->
+       by ShipIt). MinVer cannot run in this old-style project (MINVER0001), so the version is
+       queried from the SDK-style SampleClasslib via its ReportMinVerBaseVersion target (defined
+       in the root Directory.Build.props). Opt-in via /p:StampPackageVersion=true (used by CI
+       packaging) so local builds do not dirty Package.appxmanifest. The appx version must be
+       4 numeric parts with a zero revision (no prerelease suffix), hence Major.Minor.Patch.0. -->
   <Target Name="StampAppxManifestVersion"
           BeforeTargets="BeforeBuild"
-          DependsOnTargets="MinVer"
           Condition="'$(StampPackageVersion)' == 'true'">
+    <MSBuild Projects="..\SampleClasslib\SampleClasslib.csproj"
+             Targets="ReportMinVerBaseVersion"
+             RemoveProperties="Platform;Configuration">
+      <Output TaskParameter="TargetOutputs" ItemName="_MinVerBaseVersion" />
+    </MSBuild>
+    <PropertyGroup>
+      <_AppxPackageVersion>@(_MinVerBaseVersion).0</_AppxPackageVersion>
+    </PropertyGroup>
     <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
              Query="/ns:Package/ns:Identity/@Version"
-             Value="$(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0"
+             Value="$(_AppxPackageVersion)"
              Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
-    <Message Importance="high" Text="Package.appxmanifest Identity@Version stamped to $(MinVerMajor).$(MinVerMinor).$(MinVerPatch).0" />
+    <Message Importance="high" Text="Package.appxmanifest Identity@Version stamped to $(_AppxPackageVersion)" />
   </Target>
 </Project>
