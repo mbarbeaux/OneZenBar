@@ -12,3 +12,8 @@ concurrency:
 jobs:
   build:
     uses: ./.github/workflows/quality-gate.yml
+    # The reusable workflow's job requests pull-requests: write (PR coverage comment) —
+    # static validation requires every caller to grant it, even on push-only triggers
+    permissions:
+      contents: read
+      pull-requests: write
