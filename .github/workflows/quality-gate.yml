@@ -15,7 +15,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
+  # Cross-platform .NET quality gate: formatting, SampleClasslib build, tests with coverage.
+  # The UWP widget is excluded from "Any CPU" and built by the dedicated `widget` job below.
+  classlib:
     runs-on: ubuntu-latest
 
     permissions:
