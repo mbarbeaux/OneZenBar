@@ -6,6 +6,18 @@
     <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
 
+  <!-- Versioning: MinVer stamps Version/AssemblyVersion/FileVersion/InformationalVersion
+       at build time from the latest reachable git tag (vX.Y.Z, created by ShipIt in CI).
+       Builds between releases get a pre-release version with commit height (X.Y.Z-alpha.0.N).
+       Never hardcode version properties in csproj files. -->
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+
   <!-- Install the Husky.Net git hooks on every dev machine at first restore (skipped in CI via HUSKY=0) -->
   <Target Name="InstallGitHooks" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != '0' AND Exists('$(MSBuildThisFileDirectory).git')">
     <Exec Command="dotnet tool restore" WorkingDirectory="$(MSBuildThisFileDirectory)" ContinueOnError="true" StandardOutputImportance="low" />
