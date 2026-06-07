@@ -1,0 +1,39 @@
+name: Quality gate
+
+# Reusable quality gate shared by build.yml, develop.yml and release.yml.
+# Not triggered directly — callers invoke it with `uses: ./.github/workflows/quality-gate.yml`.
+on:
+  workflow_call:
+
+env:
+  # Skip Husky.Net git hook installation in CI (hooks are for local commits only)
+  HUSKY: 0
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          # Uses the SDK version pinned in global.json (single source of truth with mise.toml)
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Check formatting
+        # Same check as the local pre-commit hook (style, .editorconfig, license headers)
+        run: dotnet format --verify-no-changes --severity error --no-restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release
