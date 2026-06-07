@@ -186,11 +186,11 @@
              Value="$(AppxIdentityPublisher)"
              Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
     <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
-             Query="/ns:Package/ns:Properties/ns:PublisherDisplayName/text()"
+             Query="/ns:Package/ns:Properties/ns:PublisherDisplayName"
              Value="$(AppxPublisherDisplayName)"
              Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
     <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
-             Query="/ns:Package/ns:Properties/ns:DisplayName/text()"
+             Query="/ns:Package/ns:Properties/ns:DisplayName"
              Value="$(AppxDisplayName)"
              Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;" />
     <XmlPoke XmlInputPath="$(MSBuildThisFileDirectory)Package.appxmanifest"
