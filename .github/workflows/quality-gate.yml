@@ -112,8 +112,11 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      # The image only ships Windows SDK 26100 (not the 19041 the csproj targets by default).
+      # TargetPlatformVersion is only defaulted in the csproj when empty, so the CI overrides it;
+      # TargetPlatformMinVersion stays 19041, keeping the package installable on Windows 10 19041+.
       - name: Restore
-        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /p:TargetPlatformVersion=10.0.26100.0 /verbosity:minimal
 
       - name: Build MSIX bundle (x86 + x64 + ARM64)
         run: >
@@ -124,6 +127,7 @@ jobs:
           /p:AppxBundle=Always
           /p:UapAppxPackageBuildMode=SideloadOnly
           /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
+          /p:TargetPlatformVersion=10.0.26100.0
           /p:StampPackageVersion=true
           /verbosity:minimal
 
