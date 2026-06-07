@@ -17,3 +17,69 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+
+  # Publishes the interactive coverage report (with history/trend charts) to GitHub Pages.
+  # Gated behind the COVERAGE_PAGES_ENABLED repository variable: set it to 'true' once the
+  # repo is public AND Pages is enabled (Settings > Pages > Source: GitHub Actions).
+  coverage-pages:
+    if: ${{ vars.COVERAGE_PAGES_ENABLED == 'true' }}
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    env:
+      HUSKY: 0
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Restore dotnet tools
+        run: dotnet tool restore
+
+      - name: Download coverage data
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-data
+          path: coverage-data
+
+      - name: Restore coverage history
+        # Each run restores the most recent history (restore-keys prefix match)
+        # and saves an updated snapshot under a fresh key (run id)
+        uses: actions/cache@v4
+        with:
+          path: coverage-history
+          key: coverage-history-${{ github.run_id }}
+          restore-keys: coverage-history-
+
+      - name: Generate coverage site
+        # Html: interactive report with per-file line coverage and trend charts (from -historydir).
+        # Badges: SVG badges served from the Pages site (referenced by the README).
+        run: dotnet reportgenerator -reports:"coverage-data/**/coverage.cobertura.xml" -targetdir:coverage-site "-reporttypes:Html;Badges" -historydir:coverage-history
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: coverage-site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -58,8 +58,24 @@ jobs:
         # the cobertura file is written before the threshold check, and the report is most useful exactly then.
         if: ${{ !cancelled() }}
         run: |
-          dotnet reportgenerator -reports:"tests/**/coverage.cobertura.xml" -targetdir:coverage-report "-reporttypes:MarkdownSummaryGithub"
+          dotnet reportgenerator -reports:"tests/**/coverage.cobertura.xml" -targetdir:coverage-report "-reporttypes:MarkdownSummaryGithub;Html"
           cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report artifact
+        # Full interactive HTML report (per-file source view with line-by-line coverage highlighting)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
+
+      - name: Upload coverage data
+        # Raw cobertura files for downstream jobs (e.g. the GitHub Pages publication in develop.yml)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-data
+          path: tests/**/coverage.cobertura.xml
 
       - name: Post coverage comment on PR
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}

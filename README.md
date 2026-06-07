@@ -1,6 +1,10 @@
 # Sample
 
+[![Line coverage](https://mbarbeaux.github.io/sample/badge_linecoverage.svg)](https://mbarbeaux.github.io/sample/)
+
 .NET 10 project — basic skeleton.
+
+> The coverage badge and the [interactive coverage report](https://mbarbeaux.github.io/sample/) are published to GitHub Pages from `develop` (once the repository is public and the `COVERAGE_PAGES_ENABLED` repository variable is set).
 
 ## Prerequisites
 
