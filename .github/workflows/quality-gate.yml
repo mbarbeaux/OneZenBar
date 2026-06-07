@@ -88,7 +88,9 @@ jobs:
   # Produces one unsigned sideload .msixbundle containing the x86, x64 and ARM64 flavors,
   # with the appx version stamped from MinVer (StampPackageVersion).
   widget:
-    runs-on: windows-latest
+    # windows-2025-vs2026: Visual Studio 2026 (MSBuild 18) is required — VS 2022's MSBuild 17
+    # cannot load the .NET 10 SDK pinned in global.json (needed to build SampleClasslib)
+    runs-on: windows-2025-vs2026
 
     permissions:
       contents: read
