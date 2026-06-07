@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           # MinVer computes the version from the latest reachable v* tag — needs full history and tags
           fetch-depth: 0
@@ -102,7 +102,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           # MinVer computes the version from the latest reachable v* tag — needs full history and tags
           fetch-depth: 0
