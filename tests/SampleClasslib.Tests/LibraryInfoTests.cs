@@ -35,4 +35,14 @@ public class LibraryInfoTests
         // MinVer always produces Major.Minor.Patch, optionally followed by a prerelease suffix
         Assert.Matches(@"^\d+\.\d+\.\d+", version);
     }
+
+    [Fact]
+    public void GetVersion_StripsBuildMetadata()
+    {
+        // The .NET SDK appends the git commit id as SemVer build metadata ("+<sha>") to the
+        // informational version; it must not leak into the displayed version.
+        string version = LibraryInfo.GetVersion();
+
+        Assert.DoesNotContain('+', version);
+    }
 }

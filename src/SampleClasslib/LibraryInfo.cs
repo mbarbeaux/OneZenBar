@@ -21,11 +21,21 @@ public static class LibraryInfo
 
     /// <summary>
     /// Testable core of <see cref="GetVersion()"/>: reads the informational version of the given assembly.
+    /// The SemVer build metadata (everything after the first '+', i.e. the git commit id appended by the
+    /// .NET SDK) is stripped so the displayed version stays clean (e.g. "0.3.0", not "0.3.0+abc1234").
+    /// The prerelease suffix (e.g. "-alpha.0.5") is preserved.
     /// </summary>
     internal static string GetVersion(Assembly assembly)
     {
         AssemblyInformationalVersionAttribute? attribute =
             assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-        return attribute?.InformationalVersion ?? "unknown";
+        if (attribute is null)
+        {
+            return "unknown";
+        }
+
+        string version = attribute.InformationalVersion;
+        int metadataSeparator = version.IndexOf('+');
+        return metadataSeparator >= 0 ? version.Substring(0, metadataSeparator) : version;
     }
 }
