@@ -107,7 +107,14 @@ jobs:
     # machine is down. The self-hosted runner must match the hosted toolchain: Visual Studio 2026
     # (MSBuild 18 — VS 2022's MSBuild 17 cannot load the .NET 10 SDK in global.json), the UWP
     # workload, Windows 10 SDK 26100 and the .NET 10 SDK.
-    runs-on: ${{ vars.SELF_HOSTED == 'true' && fromJSON('["self-hosted", "Windows", "X64"]') || 'windows-2025-vs2026' }}
+    #
+    # Fork-PR guard (the repo is public): NEVER run on the self-hosted machine for a pull_request
+    # coming from a fork — otherwise anyone could execute arbitrary code on it. The self-hosted
+    # runner is used only on push events and on same-repo PRs (head.repo == this repo); fork PRs
+    # always fall back to the GitHub-hosted image (they also lack the signing secrets, so the build
+    # gracefully produces an unsigned bundle). This complements the repo setting "Require approval
+    # for all outside collaborators" (Settings > Actions > General > Fork pull request workflows).
+    runs-on: ${{ (vars.SELF_HOSTED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)) && fromJSON('["self-hosted", "Windows", "X64"]') || 'windows-2025-vs2026' }}
 
     permissions:
       contents: read
