@@ -1,5 +1,5 @@
 ---
-last_commit_released: c59252e51441511d519696e3f868c875e6672841
+last_commit_released: 0bbac464f6ff8b5988f58c3d9e87ee9df82e13b1
 ---
 
 # Changelog
@@ -11,6 +11,18 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 This changelog is generated using [EasyBuild.ShipIt](https://github.com/easybuild-org/EasyBuild.ShipIt).
 
 ⚠ Only edit the front matter metadata at the top of this file. All other changes will be overwritten when a new release is created.
+
+## 0.3.0 - 2026-06-08
+
+### 🚀 Features
+
+* Localize widget UI strings (en, fr, es, de) ([900b09e](https://github.com/mbarbeaux/sample/commit/900b09e8f71f420ff0c41095328466752b1cb8cf))
+
+### 🐞 Bug Fixes
+
+* Prevent the Store release build from failing on the disposable cert ([ce3cc98](https://github.com/mbarbeaux/sample/commit/ce3cc98b166f87c26128d7bcb4d2d2808e33ff02))
+
+<strong><small>[View changes on Github](https://github.com/mbarbeaux/sample/compare/c59252e51441511d519696e3f868c875e6672841..0bbac464f6ff8b5988f58c3d9e87ee9df82e13b1)</small></strong>
 
 ## 0.2.0 - 2026-06-07
 
