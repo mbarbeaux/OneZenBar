@@ -121,6 +121,11 @@ jobs:
   github-release:
     needs: changelog
     if: ${{ needs.changelog.outputs.released == 'true' }}
+    permissions:
+      # The called publish job needs contents: write (gh release create). A reusable workflow is
+      # capped by the permissions the caller grants, and the repo default is contents: read — so
+      # grant it explicitly here, otherwise the call is rejected at startup.
+      contents: write
     uses: ./.github/workflows/release-github.yml
     with:
       oid: ${{ needs.changelog.outputs.oid }}
