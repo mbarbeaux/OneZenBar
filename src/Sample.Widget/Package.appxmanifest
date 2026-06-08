@@ -16,14 +16,14 @@
        /p:StampPackageVersion=true (see the StampAppxManifestVersion target in the csproj). -->
   <Identity
     Name="Sample.Widget"
-    Publisher="CN=Michael Barbeaux"
+    Publisher="CN=Contoso"
     Version="0.1.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="9edb4b27-0399-49e7-a5e9-9fae764de794" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Sample Widget</DisplayName>
-    <PublisherDisplayName>Michael Barbeaux</PublisherDisplayName>
+    <PublisherDisplayName>Contoso</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

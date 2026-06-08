@@ -95,8 +95,9 @@ jobs:
   # self-signed dev certificate when the SIGNING_CERTIFICATE_* secrets are present (their
   # absence — e.g. before setup, or on Dependabot PRs which cannot read secrets — gracefully
   # falls back to an unsigned bundle). The certificate Subject must match the manifest
-  # Publisher (CN=Michael Barbeaux), and target machines must trust the public .cer
-  # (LocalMachine\TrustedPeople) for the bundle to install.
+  # Publisher injected at build time from STORE_IDENTITY_PUBLISHER (not the neutral dev
+  # placeholder committed in Package.appxmanifest), and target machines must trust the
+  # public .cer (LocalMachine\TrustedPeople) for the bundle to install.
   widget:
     # windows-2025-vs2026: Visual Studio 2026 (MSBuild 18) is required — VS 2022's MSBuild 17
     # cannot load the .NET 10 SDK pinned in global.json (needed to build SampleClasslib)
