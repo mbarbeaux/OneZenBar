@@ -42,6 +42,7 @@ dotnet format         # Format code (the pre-commit hook runs this with --verify
 - Target structure:
   - `src/` — application projects
   - `tests/` — test projects
+- **Widget UI localization**: every on-screen string in `Sample.Widget` lives in `Strings/<bcp47-tag>/Resources.resw` (one folder per language; `en-US` is the default, set by `DefaultLanguage` in the csproj; `fr-FR` is also shipped). Each `.resw` is registered as a `<PRIResource>` in the csproj and compiled into the package PRI; the manifest's `<Resource Language="x-generate"/>` derives the supported-language list from those folders. **Never hardcode user-facing text in XAML or code-behind.** In XAML, add `x:Uid="SomeUid"` to the element and define `SomeUid.Text` (or `.Content`, etc.) in every `.resw` — the literal `Text="…"` left on the element is just the en-US/designer fallback and is overridden at runtime. For runtime-composed strings (e.g. the version line), pull a format string with `ResourceLoader.GetForCurrentView().GetString("Key")` and `string.Format`. Add a language by dropping in `Strings/<tag>/Resources.resw` (same keys) and listing it as a `<PRIResource>`. The `.resw` files are UTF-8 without BOM like every other text file. Note: the manifest `DisplayName`/`Description` are intentionally NOT localized this way — they are injected from the `STORE_*` secrets at build time (see the identity note above).
 
 ## Releases
 

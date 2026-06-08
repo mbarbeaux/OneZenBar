@@ -122,6 +122,16 @@
       <SubType>Designer</SubType>
     </AppxManifest>
   </ItemGroup>
+  <!-- Localized UI strings. One Resources.resw per language under Strings\<bcp47-tag>\. The build
+       compiles them into the package PRI; the manifest's <Resource Language="x-generate"/> derives
+       the supported-language list from these folders. en-US is the default (DefaultLanguage above);
+       add a language by dropping in Strings\<tag>\Resources.resw and listing it here. -->
+  <ItemGroup>
+    <PRIResource Include="Strings\en-US\Resources.resw" />
+    <PRIResource Include="Strings\fr-FR\Resources.resw" />
+    <PRIResource Include="Strings\es-ES\Resources.resw" />
+    <PRIResource Include="Strings\de-DE\Resources.resw" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />

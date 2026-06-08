@@ -21,12 +21,14 @@
                         Foreground="#66FFFFFF"
                         Glyph="&#xE7BA;" />
             <TextBlock
+                        x:Uid="MainPageWidgetOnlyTitle"
                         HorizontalAlignment="Center"
                         FontSize="16"
                         FontWeight="SemiBold"
                         Foreground="#FFFFFF"
                         Text="This app is an Xbox Game Bar widget only" />
             <TextBlock
+                        x:Uid="MainPageWidgetOnlyDescription"
                         HorizontalAlignment="Center"
                         Foreground="#99FFFFFF"
                         Text="To use this app, please find the Sample widget in the Xbox Game Bar by pressing Win + G or the Xbox button on your controller"
