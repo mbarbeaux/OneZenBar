@@ -1,0 +1,152 @@
+name: GitHub Release
+
+# Reusable workflow — called by main.yml once the release commit and tag exist.
+# Builds the SIGNED sideload .msixbundle at the release commit and publishes the GitHub Release
+# for the tag, attaching the bundle, the public .cer (needed to trust it) and the changelog
+# section for this version. The build mirrors the `widget` job in quality-gate.yml but at the
+# release commit (so the tag is present and StampPackageVersion stamps the real X.Y.Z) and is the
+# installable artifact (SideloadOnly + dev signing), unlike store-upload's unsigned .msixupload.
+on:
+  workflow_call:
+    inputs:
+      oid:
+        description: Release commit SHA (created via API in main.yml's changelog job; carries the tag MinVer needs).
+        required: true
+        type: string
+      version:
+        description: Release version X.Y.Z (no leading "v").
+        required: true
+        type: string
+
+# env does NOT propagate from the caller into a reusable workflow — redeclare the CI vars here.
+env:
+  HUSKY: 0
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  publish:
+    runs-on: windows-2025-vs2026
+
+    permissions:
+      # Required to create the GitHub Release
+      contents: write
+
+    env:
+      # Secrets are unreadable in step `if:` expressions — exposed here as job-level flags
+      # (same pattern as quality-gate.yml's widget job). Secrets are available because the
+      # caller passes `secrets: inherit`.
+      HAS_STORE_IDENTITY: ${{ secrets.STORE_IDENTITY_NAME != '' }}
+      CAN_SIGN: ${{ secrets.SIGNING_CERTIFICATE_BASE64 != '' && secrets.STORE_IDENTITY_NAME != '' }}
+
+    steps:
+      - name: Checkout release commit
+        uses: actions/checkout@v6
+        with:
+          # The release commit (created via API in the changelog job) carries the tag MinVer needs
+          ref: ${{ inputs.oid }}
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Restore
+        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+
+      - name: Decode signing certificate
+        if: env.CAN_SIGN == 'true'
+        shell: pwsh
+        env:
+          SIGNING_CERT_B64: ${{ secrets.SIGNING_CERTIFICATE_BASE64 }}
+        run: '[IO.File]::WriteAllBytes("$env:RUNNER_TEMP\signing.pfx", [Convert]::FromBase64String($env:SIGNING_CERT_B64))'
+
+      - name: Export public certificate (.cer)
+        if: env.CAN_SIGN == 'true'
+        shell: pwsh
+        env:
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+        # Derive the public .cer from the .pfx we already decoded for signing — no extra secret
+        # needed. This is what users import into LocalMachine\TrustedPeople to trust the bundle.
+        run: |
+          $pfx = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new("$env:RUNNER_TEMP\signing.pfx", $env:SIGNING_CERT_PASSWORD)
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\Sample.Widget.cer", $pfx.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+
+      - name: Build signed MSIX bundle (x86 + x64 + ARM64)
+        shell: pwsh
+        env:
+          SIGNING_CERT_PASSWORD: ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }}
+          STORE_IDENTITY_NAME: ${{ secrets.STORE_IDENTITY_NAME }}
+          STORE_IDENTITY_PUBLISHER: ${{ secrets.STORE_IDENTITY_PUBLISHER }}
+          STORE_PUBLISHER_DISPLAY_NAME: ${{ secrets.STORE_PUBLISHER_DISPLAY_NAME }}
+          STORE_APP_DISPLAY_NAME: ${{ secrets.STORE_APP_DISPLAY_NAME }}
+        # SideloadOnly + dev signing = an installable bundle. Store identity and signing are only
+        # injected when their secrets exist; the timestamp server keeps the signature valid after
+        # the certificate itself expires.
+        run: >
+          msbuild src/Sample.Widget/Sample.Widget.csproj
+          /p:Configuration=Release
+          /p:Platform=x64
+          /p:AppxBundlePlatforms="x86|x64|ARM64"
+          /p:AppxBundle=Always
+          /p:UapAppxPackageBuildMode=SideloadOnly
+          /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
+          /p:StampPackageVersion=true
+          ${{ env.HAS_STORE_IDENTITY == 'true' && '"/p:AppxIdentityName=$env:STORE_IDENTITY_NAME" "/p:AppxIdentityPublisher=$env:STORE_IDENTITY_PUBLISHER" "/p:AppxPublisherDisplayName=$env:STORE_PUBLISHER_DISPLAY_NAME" "/p:AppxDisplayName=$env:STORE_APP_DISPLAY_NAME"' || '' }}
+          /p:AppxPackageSigningEnabled=${{ env.CAN_SIGN }}
+          ${{ env.CAN_SIGN == 'true' && format('/p:PackageCertificateKeyFile={0}\signing.pfx /p:PackageCertificatePassword=$env:SIGNING_CERT_PASSWORD /p:AppxPackageSigningTimestampServerUrl=http://timestamp.digicert.com', runner.temp) || '' }}
+          /verbosity:minimal
+
+      - name: Assemble release notes
+        shell: pwsh
+        # Extract the top-most "## X.Y.Z ..." block from the generated CHANGELOG (up to the next
+        # "## " heading) and prepend a sideload install note when the bundle is signed. The note
+        # uses 4-space-indented Markdown code blocks on purpose: backticks are the escape char in
+        # a double-quoted PowerShell here-string, so fenced blocks would be mangled.
+        run: |
+          $bundle = Get-ChildItem -Path AppPackages -Recurse -Filter *.msixbundle | Select-Object -First 1
+          if (-not $bundle) { throw "No .msixbundle produced" }
+          $md = Get-Content CHANGELOG.md -Raw
+          $section = [regex]::Match($md, '(?ms)^## \d+\.\d+\.\d+.*?(?=^## |\z)').Value.Trim()
+          if (-not $section) { throw "Could not find a changelog section in CHANGELOG.md" }
+          if ($env:CAN_SIGN -eq 'true') {
+          $install = @"
+          ### Install (sideload)
+
+          This bundle is signed with a self-signed development certificate, so the machine must trust it first. In an elevated PowerShell (Run as administrator), from the folder where you downloaded the assets:
+
+              Import-Certificate -FilePath .\Sample.Widget.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+              Add-AppxPackage -Path .\$($bundle.Name)
+
+          The widget then shows up in the Xbox Game Bar (Win + G). The Microsoft Store build is re-signed by Microsoft and requires none of this.
+
+          ---
+
+
+          "@
+          $notes = $install + $section
+          } else {
+          $notes = $section
+          }
+          Set-Content -Path "$env:RUNNER_TEMP\release-notes.md" -Value $notes -NoNewline
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        # The tag v$VERSION was created by the changelog job; --verify-tag fails fast if it is
+        # somehow missing rather than creating a dangling release.
+        run: |
+          $bundle = Get-ChildItem -Path AppPackages -Recurse -Filter *.msixbundle | Select-Object -First 1
+          if (-not $bundle) { throw "No .msixbundle produced" }
+          $assets = @($bundle.FullName)
+          if ($env:CAN_SIGN -eq 'true') { $assets += "$env:RUNNER_TEMP\Sample.Widget.cer" }
+          Write-Host "Publishing release v$env:VERSION with: $($assets -join ', ')"
+          gh release create "v$env:VERSION" $assets --title "v$env:VERSION" --notes-file "$env:RUNNER_TEMP\release-notes.md" --verify-tag
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }

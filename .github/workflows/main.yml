@@ -17,6 +17,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # Runs ShipIt on every push to main (i.e. when a release/* or hotfix/* branch is merged):
+  # generates the changelog, commits "chore: release X.Y.Z" via the GitHub API (Verified),
+  # tags vX.Y.Z, and fast-forwards develop. Outputs drive the release-time reusable workflows.
   changelog:
     runs-on: ubuntu-latest
     permissions:
@@ -111,86 +114,25 @@ jobs:
             echo "::warning::develop has diverged from main and cannot be fast-forwarded. Rebase it locally: git fetch && git checkout develop && git rebase origin/main && git push --force-with-lease"
           fi
 
-  # Builds the Store package (.msixupload, unsigned — the Store re-signs) at the release commit
-  # and submits it for certification via the Microsoft Store CLI. Runs after the tag exists.
-  # Gated behind the STORE_UPLOAD_ENABLED repository variable: set it to 'true' only AFTER the
-  # first submission (listing, screenshots, IARC age rating) has been completed once in Partner
-  # Center — the API can update an app's packages but cannot create that initial listing.
+  # Publishes the GitHub Release (signed sideload .msixbundle + .cer + changelog) on EVERY release.
+  # Not gated by STORE_UPLOAD_ENABLED — independent of Store submission, runs in parallel with it.
+  # secrets: inherit is required (signing + Store identity secrets); env/secrets do not propagate
+  # automatically to a reusable workflow.
+  github-release:
+    needs: changelog
+    if: ${{ needs.changelog.outputs.released == 'true' }}
+    uses: ./.github/workflows/release-github.yml
+    with:
+      oid: ${{ needs.changelog.outputs.oid }}
+      version: ${{ needs.changelog.outputs.version }}
+    secrets: inherit
+
+  # Submits the Store package (.msixupload) for certification. Gated behind the STORE_UPLOAD_ENABLED
+  # repository variable (see store-upload.yml for why it must stay off until the first manual listing).
   store-upload:
     needs: changelog
     if: ${{ needs.changelog.outputs.released == 'true' && vars.STORE_UPLOAD_ENABLED == 'true' }}
-    runs-on: windows-2025-vs2026
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout release commit
-        uses: actions/checkout@v6
-        with:
-          # The release commit (created via API in the changelog job) carries the tag MinVer needs
-          ref: ${{ needs.changelog.outputs.oid }}
-          fetch-depth: 0
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          global-json-file: global.json
-
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v3
-
-      - name: Restore
-        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
-
-      - name: Build Store package (.msixupload)
-        shell: pwsh
-        env:
-          STORE_IDENTITY_NAME: ${{ secrets.STORE_IDENTITY_NAME }}
-          STORE_IDENTITY_PUBLISHER: ${{ secrets.STORE_IDENTITY_PUBLISHER }}
-          STORE_PUBLISHER_DISPLAY_NAME: ${{ secrets.STORE_PUBLISHER_DISPLAY_NAME }}
-          STORE_APP_DISPLAY_NAME: ${{ secrets.STORE_APP_DISPLAY_NAME }}
-        # StoreUpload mode produces an unsigned .msixbundle wrapped in a .msixupload: the Store
-        # re-signs with Microsoft's certificate, so AppxPackageSigningEnabled stays false. The
-        # Store identity is still injected so the package matches the reserved product.
-        # GenerateTemporaryStoreCertificate=false: the csproj enables it for local VS deploys, but
-        # with signing disabled MSBuild still runs RemoveDisposableSigningCertificate and fails
-        # (MSB4044, empty CertificateThumbprint) — disabling it skips the disposable-cert flow.
-        run: >
-          msbuild src/Sample.Widget/Sample.Widget.csproj
-          /p:Configuration=Release
-          /p:Platform=x64
-          /p:AppxBundlePlatforms="x86|x64|ARM64"
-          /p:AppxBundle=Always
-          /p:UapAppxPackageBuildMode=StoreUpload
-          /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
-          /p:StampPackageVersion=true
-          /p:AppxPackageSigningEnabled=false
-          /p:GenerateTemporaryStoreCertificate=false
-          "/p:AppxIdentityName=$env:STORE_IDENTITY_NAME"
-          "/p:AppxIdentityPublisher=$env:STORE_IDENTITY_PUBLISHER"
-          "/p:AppxPublisherDisplayName=$env:STORE_PUBLISHER_DISPLAY_NAME"
-          "/p:AppxDisplayName=$env:STORE_APP_DISPLAY_NAME"
-          /verbosity:minimal
-
-      - name: Setup Microsoft Store CLI
-        # Puts `msstore` on PATH. node20 action — runs on Node 24 via FORCE_JAVASCRIPT_ACTIONS_TO_NODE24.
-        uses: microsoft/microsoft-store-apppublisher@v1.3
-
-      - name: Submit to the Microsoft Store
-        shell: pwsh
-        env:
-          AAD_TENANT_ID: ${{ secrets.AAD_TENANT_ID }}
-          AAD_CLIENT_ID: ${{ secrets.AAD_CLIENT_ID }}
-          AAD_CLIENT_SECRET: ${{ secrets.AAD_CLIENT_SECRET }}
-          PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
-          STORE_APP_ID: ${{ secrets.STORE_APP_ID }}
-        run: |
-          msstore reconfigure --tenantId $env:AAD_TENANT_ID --sellerId $env:PARTNER_CENTER_SELLER_ID --clientId $env:AAD_CLIENT_ID --clientSecret $env:AAD_CLIENT_SECRET
-          if ($LASTEXITCODE -ne 0) { throw "msstore reconfigure failed" }
-          $pkg = Get-ChildItem -Path AppPackages -Recurse -Filter *.msixupload | Select-Object -First 1
-          if (-not $pkg) { throw "No .msixupload produced" }
-          Write-Host "Submitting $($pkg.Name) to app $env:STORE_APP_ID"
-          # publish: uploads the package into a new submission and commits it for certification
-          msstore publish $pkg.FullName --appId $env:STORE_APP_ID
-          if ($LASTEXITCODE -ne 0) { throw "msstore publish failed" }
+    uses: ./.github/workflows/store-upload.yml
+    with:
+      oid: ${{ needs.changelog.outputs.oid }}
+    secrets: inherit
