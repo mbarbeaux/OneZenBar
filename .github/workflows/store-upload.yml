@@ -23,7 +23,10 @@ env:
 
 jobs:
   submit:
-    runs-on: windows-2025-vs2026
+    # Runner selection (manual toggle): self-hosted Windows runner when the SELF_HOSTED repo
+    # variable is 'true', else the GitHub-hosted image. No availability fallback — see the widget
+    # job in quality-gate.yml for the full rationale and the toolchain the runner must provide.
+    runs-on: ${{ vars.SELF_HOSTED == 'true' && fromJSON('["self-hosted", "Windows", "X64"]') || 'windows-2025-vs2026' }}
 
     permissions:
       contents: read
@@ -37,6 +40,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup .NET SDK
+        # Skipped on the self-hosted runner (it already has the SDK via VS 2026, and setup-dotnet
+        # cannot write to C:\Program Files\dotnet without admin). The machine must provide a
+        # .NET 10 SDK >= 10.0.300 on PATH (global.json: 10.0.300, rollForward latestFeature).
+        if: ${{ vars.SELF_HOSTED != 'true' }}
         uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json

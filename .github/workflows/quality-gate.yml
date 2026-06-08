@@ -99,9 +99,15 @@ jobs:
   # placeholder committed in Package.appxmanifest), and target machines must trust the
   # public .cer (LocalMachine\TrustedPeople) for the bundle to install.
   widget:
-    # windows-2025-vs2026: Visual Studio 2026 (MSBuild 18) is required — VS 2022's MSBuild 17
-    # cannot load the .NET 10 SDK pinned in global.json (needed to build SampleClasslib)
-    runs-on: windows-2025-vs2026
+    # Runner selection (manual toggle): when the SELF_HOSTED repo variable is 'true', run on the
+    # local self-hosted Windows runner (labels self-hosted + Windows + X64); otherwise on the
+    # GitHub-hosted windows-2025-vs2026 image. Set it with `gh variable set SELF_HOSTED --body true`
+    # (or false). GitHub has NO automatic availability fallback: if SELF_HOSTED is 'true' but the
+    # runner is offline, the job queues and waits — flip the variable back to 'false' when the
+    # machine is down. The self-hosted runner must match the hosted toolchain: Visual Studio 2026
+    # (MSBuild 18 — VS 2022's MSBuild 17 cannot load the .NET 10 SDK in global.json), the UWP
+    # workload, Windows 10 SDK 26100 and the .NET 10 SDK.
+    runs-on: ${{ vars.SELF_HOSTED == 'true' && fromJSON('["self-hosted", "Windows", "X64"]') || 'windows-2025-vs2026' }}
 
     permissions:
       contents: read
@@ -123,7 +129,11 @@ jobs:
 
       - name: Setup .NET SDK
         # The widget references SampleClasslib (SDK-style project): MSBuild resolves the .NET SDK
-        # pinned in global.json through the dotnet on PATH
+        # pinned in global.json through the dotnet on PATH.
+        # Skipped on the self-hosted runner: it already has the SDK (VS 2026), and setup-dotnet
+        # cannot install into C:\Program Files\dotnet without admin. The machine must provide a
+        # .NET 10 SDK >= 10.0.300 on PATH (global.json: 10.0.300, rollForward latestFeature).
+        if: ${{ vars.SELF_HOSTED != 'true' }}
         uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
