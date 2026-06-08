@@ -153,6 +153,9 @@ jobs:
         # StoreUpload mode produces an unsigned .msixbundle wrapped in a .msixupload: the Store
         # re-signs with Microsoft's certificate, so AppxPackageSigningEnabled stays false. The
         # Store identity is still injected so the package matches the reserved product.
+        # GenerateTemporaryStoreCertificate=false: the csproj enables it for local VS deploys, but
+        # with signing disabled MSBuild still runs RemoveDisposableSigningCertificate and fails
+        # (MSB4044, empty CertificateThumbprint) — disabling it skips the disposable-cert flow.
         run: >
           msbuild src/Sample.Widget/Sample.Widget.csproj
           /p:Configuration=Release
@@ -163,6 +166,7 @@ jobs:
           /p:AppxPackageDir="${{ github.workspace }}\AppPackages\"
           /p:StampPackageVersion=true
           /p:AppxPackageSigningEnabled=false
+          /p:GenerateTemporaryStoreCertificate=false
           "/p:AppxIdentityName=$env:STORE_IDENTITY_NAME"
           "/p:AppxIdentityPublisher=$env:STORE_IDENTITY_PUBLISHER"
           "/p:AppxPublisherDisplayName=$env:STORE_PUBLISHER_DISPLAY_NAME"
