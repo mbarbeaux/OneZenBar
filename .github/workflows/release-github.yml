@@ -158,7 +158,7 @@ jobs:
       # depend on gh being installed on the runner (it is absent on the self-hosted runner). The
       # tag v$VERSION was created by the changelog job; the release is attached to that tag.
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ inputs.version }}
           name: v${{ inputs.version }}
