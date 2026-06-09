@@ -1,5 +1,5 @@
 ---
-last_commit_released: a42ce5715d2f6e4457eea786ba50133226c02be5
+last_commit_released: 90080705ab0fd13fe8d657a755c927cd7bc3bfcf
 ---
 
 # Changelog
@@ -11,6 +11,14 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 This changelog is generated using [EasyBuild.ShipIt](https://github.com/easybuild-org/EasyBuild.ShipIt).
 
 ⚠ Only edit the front matter metadata at the top of this file. All other changes will be overwritten when a new release is created.
+
+## 0.4.1 - 2026-06-09
+
+### 🐞 Bug Fixes
+
+* *(ci)* Publish the GitHub Release via action-gh-release, not the gh CLI ([9008070](https://github.com/mbarbeaux/OneZenBar/commit/90080705ab0fd13fe8d657a755c927cd7bc3bfcf))
+
+<strong><small>[View changes on Github](https://github.com/mbarbeaux/OneZenBar/compare/a42ce5715d2f6e4457eea786ba50133226c02be5..90080705ab0fd13fe8d657a755c927cd7bc3bfcf)</small></strong>
 
 ## 0.4.0 - 2026-06-09
 
