@@ -1,5 +1,5 @@
 ---
-last_commit_released: 0bbac464f6ff8b5988f58c3d9e87ee9df82e13b1
+last_commit_released: a42ce5715d2f6e4457eea786ba50133226c02be5
 ---
 
 # Changelog
@@ -11,6 +11,18 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 This changelog is generated using [EasyBuild.ShipIt](https://github.com/easybuild-org/EasyBuild.ShipIt).
 
 ⚠ Only edit the front matter metadata at the top of this file. All other changes will be overwritten when a new release is created.
+
+## 0.4.0 - 2026-06-09
+
+### 🚀 Features
+
+* *(widget)* Replace app icons with ensō zen design ([a42ce57](https://github.com/mbarbeaux/OneZenBar/commit/a42ce5715d2f6e4457eea786ba50133226c02be5))
+
+### 🐞 Bug Fixes
+
+* Strip SemVer build metadata from the displayed library version ([2659ef3](https://github.com/mbarbeaux/OneZenBar/commit/2659ef3749c54dc418bb1acddf54122a10751100))
+
+<strong><small>[View changes on Github](https://github.com/mbarbeaux/OneZenBar/compare/0bbac464f6ff8b5988f58c3d9e87ee9df82e13b1..a42ce5715d2f6e4457eea786ba50133226c02be5)</small></strong>
 
 ## 0.3.0 - 2026-06-08
 
