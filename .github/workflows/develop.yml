@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - develop
+  # Manual trigger: re-run the quality gate + coverage Pages publish on demand,
+  # without an empty commit or a PR (Actions tab > Develop > Run workflow, or
+  # `gh workflow run develop.yml --ref develop`).
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
