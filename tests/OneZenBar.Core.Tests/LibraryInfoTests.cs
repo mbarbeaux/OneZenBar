@@ -45,4 +45,28 @@ public class LibraryInfoTests
 
         Assert.DoesNotContain('+', version);
     }
+
+    [Theory]
+    [InlineData("1.2.3+abc1234", "1.2.3")]                      // build metadata present -> stripped
+    [InlineData("1.2.3", "1.2.3")]                              // no metadata -> returned unchanged
+    [InlineData("1.2.3-alpha.0.5+def5678", "1.2.3-alpha.0.5")]  // prerelease kept, metadata stripped
+    [InlineData("1.2.3-alpha.0.5", "1.2.3-alpha.0.5")]          // prerelease kept, no metadata
+    public void GetVersion_StripsOnlyBuildMetadata(string informationalVersion, string expected)
+    {
+        // Drive BOTH branches of the metadata-stripping ternary deterministically: the real
+        // assembly only exercises one of them (whichever the current build's version matches).
+        Assembly assembly = AssemblyWithInformationalVersion(informationalVersion);
+
+        Assert.Equal(expected, LibraryInfo.GetVersion(assembly));
+    }
+
+    private static Assembly AssemblyWithInformationalVersion(string value)
+    {
+        AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(
+            new AssemblyName($"OneZenBar.Core.Tests.Info_{Guid.NewGuid():N}"), AssemblyBuilderAccess.Run);
+        ConstructorInfo constructor =
+            typeof(AssemblyInformationalVersionAttribute).GetConstructor(new[] { typeof(string) })!;
+        assembly.SetCustomAttribute(new CustomAttributeBuilder(constructor, new object[] { value }));
+        return assembly;
+    }
 }
