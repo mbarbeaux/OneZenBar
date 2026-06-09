@@ -142,18 +142,26 @@ jobs:
           }
           Set-Content -Path "$env:RUNNER_TEMP\release-notes.md" -Value $notes -NoNewline
 
-      - name: Create GitHub Release
+      # Gather the assets into a workspace folder so the publish action can glob them. The signed
+      # .msixbundle is the installable artifact; the .cer (when signing) is needed to trust it.
+      - name: Stage release assets
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ inputs.version }}
-        # The tag v$VERSION was created by the changelog job; --verify-tag fails fast if it is
-        # somehow missing rather than creating a dangling release.
         run: |
           $bundle = Get-ChildItem -Path AppPackages -Recurse -Filter *.msixbundle | Select-Object -First 1
           if (-not $bundle) { throw "No .msixbundle produced" }
-          $assets = @($bundle.FullName)
-          if ($env:CAN_SIGN -eq 'true') { $assets += "$env:RUNNER_TEMP\OneZenBar.Widget.cer" }
-          Write-Host "Publishing release v$env:VERSION with: $($assets -join ', ')"
-          gh release create "v$env:VERSION" $assets --title "v$env:VERSION" --notes-file "$env:RUNNER_TEMP\release-notes.md" --verify-tag
-          if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }
+          New-Item -ItemType Directory -Force -Path release-assets | Out-Null
+          Copy-Item $bundle.FullName release-assets\
+          if ($env:CAN_SIGN -eq 'true') { Copy-Item "$env:RUNNER_TEMP\OneZenBar.Widget.cer" release-assets\ }
+          Write-Host "Staged: $((Get-ChildItem release-assets).Name -join ', ')"
+
+      # Publish through the GitHub API (JS action) rather than the gh CLI, so this step does not
+      # depend on gh being installed on the runner (it is absent on the self-hosted runner). The
+      # tag v$VERSION was created by the changelog job; the release is attached to that tag.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          body_path: ${{ runner.temp }}/release-notes.md
+          files: release-assets/*
+          fail_on_unmatched_files: true
