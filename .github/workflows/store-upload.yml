@@ -52,7 +52,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Restore
-        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+        run: msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
       - name: Build Store package (.msixupload)
         shell: pwsh
@@ -68,7 +68,7 @@ jobs:
         # with signing disabled MSBuild still runs RemoveDisposableSigningCertificate and fails
         # (MSB4044, empty CertificateThumbprint) — disabling it skips the disposable-cert flow.
         run: >
-          msbuild src/Sample.Widget/Sample.Widget.csproj
+          msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj
           /p:Configuration=Release
           /p:Platform=x64
           /p:AppxBundlePlatforms="x86|x64|ARM64"

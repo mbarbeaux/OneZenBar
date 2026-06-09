@@ -11,7 +11,7 @@
        Builds between releases get a pre-release version with commit height (X.Y.Z-alpha.0.N).
        Never hardcode version properties in csproj files.
        SDK-style projects only (MINVER0001): the UWP widget gets its version by calling
-       ReportMinVerBaseVersion on SampleClasslib instead (see StampAppxManifestVersion). -->
+       ReportMinVerBaseVersion on OneZenBar.Core instead (see StampAppxManifestVersion). -->
   <ItemGroup>
     <PackageReference Include="MinVer" Version="7.0.0" PrivateAssets="All" Condition="'$(UsingMicrosoftNETSdk)' == 'true'" />
   </ItemGroup>

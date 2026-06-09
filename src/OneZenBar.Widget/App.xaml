@@ -1,5 +1,5 @@
 <Application
-    x:Class="Sample.Widget.App"
+    x:Class="OneZenBar.Widget.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Sample.Widget" />
+    xmlns:local="using:OneZenBar.Widget" />

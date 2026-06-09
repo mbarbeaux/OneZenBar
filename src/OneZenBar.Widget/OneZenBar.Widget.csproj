@@ -7,8 +7,8 @@
     <ProjectGuid>{0D822FEC-773E-43F5-BB84-00D86CEC00F3}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Sample.Widget</RootNamespace>
-    <AssemblyName>Sample.Widget</AssemblyName>
+    <RootNamespace>OneZenBar.Widget</RootNamespace>
+    <AssemblyName>OneZenBar.Widget</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <!-- Compiled against SDK 26100 (the only one on CI runner images and modern VS installs),
@@ -165,8 +165,8 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SampleClasslib\SampleClasslib.csproj">
-      <Name>SampleClasslib</Name>
+    <ProjectReference Include="..\OneZenBar.Core\OneZenBar.Core.csproj">
+      <Name>OneZenBar.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
@@ -215,14 +215,14 @@
   </Target>
   <!-- Stamps the appx package version from the MinVer-computed version (vX.Y.Z git tags created
        by ShipIt). MinVer cannot run in this old-style project (MINVER0001), so the version is
-       queried from the SDK-style SampleClasslib via its ReportMinVerBaseVersion target (defined
+       queried from the SDK-style OneZenBar.Core via its ReportMinVerBaseVersion target (defined
        in the root Directory.Build.props). Opt-in via /p:StampPackageVersion=true (used by CI
        packaging) so local builds do not dirty Package.appxmanifest. The appx version must be
        4 numeric parts with a zero revision (no prerelease suffix), hence Major.Minor.Patch.0. -->
   <Target Name="StampAppxManifestVersion"
           BeforeTargets="BeforeBuild"
           Condition="'$(StampPackageVersion)' == 'true'">
-    <MSBuild Projects="..\SampleClasslib\SampleClasslib.csproj"
+    <MSBuild Projects="..\OneZenBar.Core\OneZenBar.Core.csproj"
              Targets="ReportMinVerBaseVersion"
              RemoveProperties="Platform;Configuration">
       <Output TaskParameter="TargetOutputs" ItemName="_MinVerBaseVersion" />

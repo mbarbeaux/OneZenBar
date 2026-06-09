@@ -3,7 +3,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace SampleClasslib.Tests;
+namespace OneZenBar.Core.Tests;
 
 public class LibraryInfoTests
 {
@@ -12,7 +12,7 @@ public class LibraryInfoTests
     {
         // A dynamically emitted assembly carries no AssemblyInformationalVersionAttribute
         AssemblyBuilder assemblyWithoutAttribute = AssemblyBuilder.DefineDynamicAssembly(
-            new AssemblyName("SampleClasslib.Tests.NoAttributes"), AssemblyBuilderAccess.Run);
+            new AssemblyName("OneZenBar.Core.Tests.NoAttributes"), AssemblyBuilderAccess.Run);
 
         string version = LibraryInfo.GetVersion(assemblyWithoutAttribute);
 

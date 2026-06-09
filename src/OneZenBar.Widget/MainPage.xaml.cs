@@ -2,7 +2,7 @@
 
 using Windows.UI.Xaml.Controls;
 
-namespace Sample.Widget
+namespace OneZenBar.Widget
 {
     /// <summary>
     /// Page that opens if the widget app is launched as a regular UWP app instead of Xbox Game Bar widget (for example, from the Start menu or when debugging).

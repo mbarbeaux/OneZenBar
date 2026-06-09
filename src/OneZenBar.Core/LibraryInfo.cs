@@ -2,7 +2,7 @@
 
 using System.Reflection;
 
-namespace SampleClasslib;
+namespace OneZenBar.Core;
 
 /// <summary>
 /// Exposes build-time information about this library.

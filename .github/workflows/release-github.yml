@@ -64,7 +64,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Restore
-        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+        run: msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
       - name: Decode signing certificate
         if: env.CAN_SIGN == 'true'
@@ -82,7 +82,7 @@ jobs:
         # needed. This is what users import into LocalMachine\TrustedPeople to trust the bundle.
         run: |
           $pfx = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new("$env:RUNNER_TEMP\signing.pfx", $env:SIGNING_CERT_PASSWORD)
-          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\Sample.Widget.cer", $pfx.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\OneZenBar.Widget.cer", $pfx.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert))
 
       - name: Build signed MSIX bundle (x86 + x64 + ARM64)
         shell: pwsh
@@ -96,7 +96,7 @@ jobs:
         # injected when their secrets exist; the timestamp server keeps the signature valid after
         # the certificate itself expires.
         run: >
-          msbuild src/Sample.Widget/Sample.Widget.csproj
+          msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj
           /p:Configuration=Release
           /p:Platform=x64
           /p:AppxBundlePlatforms="x86|x64|ARM64"
@@ -127,7 +127,7 @@ jobs:
 
           This bundle is signed with a self-signed development certificate, so the machine must trust it first. In an elevated PowerShell (Run as administrator), from the folder where you downloaded the assets:
 
-              Import-Certificate -FilePath .\Sample.Widget.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+              Import-Certificate -FilePath .\OneZenBar.Widget.cer -CertStoreLocation Cert:\LocalMachine\TrustedPeople
               Add-AppxPackage -Path .\$($bundle.Name)
 
           The widget then shows up in the Xbox Game Bar (Win + G). The Microsoft Store build is re-signed by Microsoft and requires none of this.
@@ -153,7 +153,7 @@ jobs:
           $bundle = Get-ChildItem -Path AppPackages -Recurse -Filter *.msixbundle | Select-Object -First 1
           if (-not $bundle) { throw "No .msixbundle produced" }
           $assets = @($bundle.FullName)
-          if ($env:CAN_SIGN -eq 'true') { $assets += "$env:RUNNER_TEMP\Sample.Widget.cer" }
+          if ($env:CAN_SIGN -eq 'true') { $assets += "$env:RUNNER_TEMP\OneZenBar.Widget.cer" }
           Write-Host "Publishing release v$env:VERSION with: $($assets -join ', ')"
           gh release create "v$env:VERSION" $assets --title "v$env:VERSION" --notes-file "$env:RUNNER_TEMP\release-notes.md" --verify-tag
           if ($LASTEXITCODE -ne 0) { throw "gh release create failed" }

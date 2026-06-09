@@ -15,7 +15,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # Cross-platform .NET quality gate: formatting, SampleClasslib build, tests with coverage.
+  # Cross-platform .NET quality gate: formatting, OneZenBar.Core build, tests with coverage.
   # The UWP widget is excluded from "Any CPU" and built by the dedicated `widget` job below.
   classlib:
     runs-on: ubuntu-latest
@@ -135,7 +135,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup .NET SDK
-        # The widget references SampleClasslib (SDK-style project): MSBuild resolves the .NET SDK
+        # The widget references OneZenBar.Core (SDK-style project): MSBuild resolves the .NET SDK
         # pinned in global.json through the dotnet on PATH.
         # Skipped on the self-hosted runner: it already has the SDK (VS 2026), and setup-dotnet
         # cannot install into C:\Program Files\dotnet without admin. The machine must provide a
@@ -149,7 +149,7 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Restore
-        run: msbuild src/Sample.Widget/Sample.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+        run: msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
       - name: Decode signing certificate
         if: env.CAN_SIGN == 'true'
@@ -169,7 +169,7 @@ jobs:
         # The Store identity and signing properties are only injected when their secrets exist;
         # the timestamp server keeps the signature valid after the certificate itself expires
         run: >
-          msbuild src/Sample.Widget/Sample.Widget.csproj
+          msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj
           /p:Configuration=Release
           /p:Platform=x64
           /p:AppxBundlePlatforms="x86|x64|ARM64"
@@ -185,5 +185,5 @@ jobs:
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v7
         with:
-          name: Sample.Widget-msix
+          name: OneZenBar.Widget-msix
           path: AppPackages/**/*.msixbundle

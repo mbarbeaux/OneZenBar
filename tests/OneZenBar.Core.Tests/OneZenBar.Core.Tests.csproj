@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SampleClasslib\SampleClasslib.csproj" />
+    <ProjectReference Include="..\..\src\OneZenBar.Core\OneZenBar.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -74,8 +74,8 @@
     <comment>MainPage heading. Tells the user the app only runs as a Game Bar widget.</comment>
   </data>
   <data name="MainPageWidgetOnlyDescription.Text" xml:space="preserve">
-    <value>To use this app, please find the Sample widget in the Xbox Game Bar by pressing Win + G or the Xbox button on your controller</value>
-    <comment>MainPage body text. "Sample" is the app name and must not be translated.</comment>
+    <value>To use this app, please find the One Zen Bar widget in the Xbox Game Bar by pressing Win + G or the Xbox button on your controller</value>
+    <comment>MainPage body text. "One Zen Bar" is the app name and must not be translated.</comment>
   </data>
   <!-- PrimaryWidget.xaml: the actual Game Bar widget surface. -->
   <data name="PrimaryWidgetStatus.Text" xml:space="preserve">
@@ -83,7 +83,7 @@
     <comment>PrimaryWidget status line shown under the library version.</comment>
   </data>
   <data name="LibraryVersionFormat" xml:space="preserve">
-    <value>SampleClasslib {0}</value>
-    <comment>PrimaryWidget library version line. {0} is the version number. "SampleClasslib" is a library name and must not be translated.</comment>
+    <value>OneZenBar.Core {0}</value>
+    <comment>PrimaryWidget library version line. {0} is the version number. "OneZenBar.Core" is a library name and must not be translated.</comment>
   </data>
 </root>

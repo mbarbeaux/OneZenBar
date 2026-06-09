@@ -8,18 +8,18 @@
   <Folder Name="/src/">
     <!-- UWP project: only buildable on Windows with the Visual Studio UWP workload, and only for
          concrete architectures — excluded from "Any CPU" so `dotnet build` keeps working everywhere. -->
-    <Project Path="src/Sample.Widget/Sample.Widget.csproj">
+    <Project Path="src/OneZenBar.Widget/OneZenBar.Widget.csproj">
       <Build Solution="*|Any CPU" Project="false" />
       <Platform Solution="*|x64" Project="x64" />
       <Platform Solution="*|x86" Project="x86" />
       <Platform Solution="*|ARM64" Project="ARM64" />
     </Project>
-    <Project Path="src/SampleClasslib/SampleClasslib.csproj">
+    <Project Path="src/OneZenBar.Core/OneZenBar.Core.csproj">
       <Platform Project="Any CPU" />
     </Project>
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/SampleClasslib.Tests/SampleClasslib.Tests.csproj">
+    <Project Path="tests/OneZenBar.Core.Tests/OneZenBar.Core.Tests.csproj">
       <Platform Project="Any CPU" />
     </Project>
   </Folder>

@@ -1,11 +1,11 @@
 // Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
 
-using SampleClasslib;
+using OneZenBar.Core;
 using System.Globalization;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.Xaml.Controls;
 
-namespace Sample.Widget
+namespace OneZenBar.Widget
 {
     /// <summary>
     /// Primary widget page for the application.

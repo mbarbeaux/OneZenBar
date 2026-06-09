@@ -2,7 +2,7 @@
 
 using Windows.Foundation.Metadata;
 
-namespace Sample.Widget
+namespace OneZenBar.Widget
 {
     /// <summary>
     /// Runtime guards for Windows APIs newer than the minimum supported OS.

@@ -1,12 +1,12 @@
-# Sample
+# One Zen Bar
 
-[![Build (develop)](https://github.com/mbarbeaux/sample/actions/workflows/develop.yml/badge.svg?branch=develop)](https://github.com/mbarbeaux/sample/actions/workflows/develop.yml?query=branch%3Adevelop)
-[![Release (main)](https://github.com/mbarbeaux/sample/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/mbarbeaux/sample/actions/workflows/main.yml?query=branch%3Amain)
-[![Line coverage](https://mbarbeaux.github.io/sample/badge_linecoverage.svg)](https://mbarbeaux.github.io/sample/)
+[![Build (develop)](https://github.com/mbarbeaux/OneZenBar/actions/workflows/develop.yml/badge.svg?branch=develop)](https://github.com/mbarbeaux/OneZenBar/actions/workflows/develop.yml?query=branch%3Adevelop)
+[![Release (main)](https://github.com/mbarbeaux/OneZenBar/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/mbarbeaux/OneZenBar/actions/workflows/main.yml?query=branch%3Amain)
+[![Line coverage](https://mbarbeaux.github.io/OneZenBar/badge_linecoverage.svg)](https://mbarbeaux.github.io/OneZenBar/)
 
-**Sample** is an [Xbox Game Bar](https://support.xbox.com/help/games-apps/game-setup-and-play/getting-started-with-game-bar) widget for Windows, built on .NET 10. It pairs a cross-platform .NET class library with a UWP widget that surfaces it inside the Game Bar overlay (open with **Win + G**).
+**One Zen Bar** is an [Xbox Game Bar](https://support.xbox.com/help/games-apps/game-setup-and-play/getting-started-with-game-bar) widget for Windows, built on .NET 10. It pairs a cross-platform .NET class library with a UWP widget that surfaces it inside the Game Bar overlay (open with **Win + G**).
 
-> The coverage badge and the [interactive coverage report](https://mbarbeaux.github.io/sample/) are published to GitHub Pages from `develop` (once the repository is public and the `COVERAGE_PAGES_ENABLED` repository variable is set).
+> The coverage badge and the [interactive coverage report](https://mbarbeaux.github.io/OneZenBar/) are published to GitHub Pages from `develop` (once the repository is public and the `COVERAGE_PAGES_ENABLED` repository variable is set).
 
 ## Download
 
@@ -21,12 +21,12 @@ Get it from the Microsoft Store:
   </picture>
 </a>
 
-Alternatively, download the signed `.msixbundle` from the [Releases page](https://github.com/mbarbeaux/sample/releases) and sideload it — each release ships the bundle, the public certificate to trust and step-by-step install instructions.
+Alternatively, download the signed `.msixbundle` from the [Releases page](https://github.com/mbarbeaux/OneZenBar/releases) and sideload it — each release ships the bundle, the public certificate to trust and step-by-step install instructions.
 
 ## Project layout
 
-- `src/SampleClasslib` — `netstandard2.0` class library holding the shared logic (AnyCPU; builds on every OS).
-- `src/Sample.Widget` — the UWP Xbox Game Bar widget (x86/x64/ARM64). **Windows-only**, and localized in English, French, Spanish and German.
+- `src/OneZenBar.Core` — `netstandard2.0` class library holding the shared logic (AnyCPU; builds on every OS).
+- `src/OneZenBar.Widget` — the UWP Xbox Game Bar widget (x86/x64/ARM64). **Windows-only**, and localized in English, French, Spanish and German.
 - `tests/` — tests for the class library.
 
 ## Prerequisites
@@ -52,7 +52,7 @@ dotnet build
 dotnet test
 ```
 
-To build or run the widget itself, open `Sample.slnx` in Visual Studio on Windows (with the UWP workload) and deploy the `Sample.Widget` project; it then appears in the Xbox Game Bar.
+To build or run the widget itself, open `OneZenBar.slnx` in Visual Studio on Windows (with the UWP workload) and deploy the `OneZenBar.Widget` project; it then appears in the Xbox Game Bar.
 
 ## License
 

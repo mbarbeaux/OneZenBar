@@ -3,11 +3,11 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Sample.Widget")]
-[assembly: AssemblyDescription("Sample Xbox Game Bar widget")]
+[assembly: AssemblyTitle("OneZenBar.Widget")]
+[assembly: AssemblyDescription("One Zen Bar Xbox Game Bar widget")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Michael Barbeaux")]
-[assembly: AssemblyProduct("Sample")]
+[assembly: AssemblyProduct("One Zen Bar")]
 [assembly: AssemblyCopyright("Copyright (C) 2026 Michael Barbeaux")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

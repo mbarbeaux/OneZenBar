@@ -40,7 +40,7 @@ gh run view <run-id> --log | grep "build / widget" \
   | grep -iE "error|warning MSB|Build succeeded|\.msixbundle|\.msix|StampAppx|Build FAILED" | head -40
 ```
 A successful build ends with a line like:
-`Sample.Widget_<version>_x86_x64_ARM64.msixbundle` under `AppPackages/`, plus per-platform `.msix` (x86/x64/ARM64) and the language packs (`language-de`, `language-es`, `language-fr`).
+`OneZenBar.Widget_<version>_x86_x64_ARM64.msixbundle` under `AppPackages/`, plus per-platform `.msix` (x86/x64/ARM64) and the language packs (`language-de`, `language-es`, `language-fr`).
 
 ## Common failure signals (and what they mean)
 

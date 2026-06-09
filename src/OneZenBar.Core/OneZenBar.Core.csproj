@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="SampleClasslib.Tests" />
+    <InternalsVisibleTo Include="OneZenBar.Core.Tests" />
   </ItemGroup>
 
 </Project>
