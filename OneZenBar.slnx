@@ -14,12 +14,10 @@
       <Platform Solution="*|x86" Project="x86" />
       <Platform Solution="*|ARM64" Project="ARM64" />
     </Project>
-    <Project Path="src/OneZenBar.Core/OneZenBar.Core.csproj">
-      <Platform Project="Any CPU" />
-    </Project>
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/OneZenBar.Core.Tests/OneZenBar.Core.Tests.csproj">
+    <!-- Version anchor: a tiny SDK-style project whose only purpose is to carry MinVer so the
+         old-style UWP widget (where MinVer cannot run — MINVER0001) can query the repo version
+         through the ReportMinVerBaseVersion target. See StampAppxManifestVersion in the widget. -->
+    <Project Path="src/OneZenBar.Version/OneZenBar.Version.csproj">
       <Platform Project="Any CPU" />
     </Project>
   </Folder>

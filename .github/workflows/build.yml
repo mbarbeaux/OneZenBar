@@ -17,10 +17,8 @@ concurrency:
 jobs:
   build:
     uses: ./.github/workflows/quality-gate.yml
-    # The reusable workflow posts the coverage comment on PRs — the caller must grant the permission
     permissions:
       contents: read
-      pull-requests: write
     # Like env, secrets do NOT propagate to reusable workflows — required for the MSIX signing
-    # secrets (SIGNING_CERTIFICATE_*) read inside the quality gate
+    # secrets (SIGNING_CERTIFICATE_*) and the GH_PACKAGES_PAT restore credential used inside the gate
     secrets: inherit

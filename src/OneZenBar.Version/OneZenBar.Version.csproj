@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Version anchor only. This project ships nothing and is never packed or referenced at runtime:
+       it exists so the old-style UWP widget can read the repo's MinVer-computed version through the
+       ReportMinVerBaseVersion target (defined in the root Directory.Build.props, which adds MinVer to
+       every SDK-style project). The widget's StampAppxManifestVersion target invokes that target on
+       THIS project. Keeping it empty means the appx version follows this repo's own vX.Y.Z tags. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <!-- No source files: an empty assembly is enough to host the MinVer target. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+</Project>

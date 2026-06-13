@@ -15,81 +15,10 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  # Cross-platform .NET quality gate: formatting, OneZenBar.Core build, tests with coverage.
-  # The UWP widget is excluded from "Any CPU" and built by the dedicated `widget` job below.
-  classlib:
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      # Needed to post/update the coverage comment on PRs
-      pull-requests: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          # MinVer computes the version from the latest reachable v* tag — needs full history and tags
-          fetch-depth: 0
-
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          # Uses the SDK version pinned in global.json (single source of truth with mise.toml)
-          global-json-file: global.json
-
-      - name: Restore
-        run: dotnet restore
-
-      - name: Restore dotnet tools
-        # ReportGenerator comes from the local tools manifest; the automatic restore at build
-        # time (InstallGitHooks target in Directory.Build.props) is disabled in CI by HUSKY=0
-        run: dotnet tool restore
-
-      - name: Check formatting
-        # Same check as the local pre-commit hook (style, .editorconfig, license headers)
-        run: dotnet format --verify-no-changes --severity error --no-restore
-
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        # GitHubActionsTestLogger: failed tests become annotations + a report in the job summary.
-        # coverlet.msbuild: fails this step if line coverage drops below the Threshold set in the test csproj.
-        run: dotnet test --no-build --configuration Release --logger GitHubActions /p:CollectCoverage=true
-
-      - name: Coverage report
-        # Runs even when the Test step failed (tests red or coverage below threshold):
-        # the cobertura file is written before the threshold check, and the report is most useful exactly then.
-        if: ${{ !cancelled() }}
-        run: |
-          dotnet reportgenerator -reports:"tests/**/coverage.cobertura.xml" -targetdir:coverage-report "-reporttypes:MarkdownSummaryGithub;Html"
-          cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload coverage report artifact
-        # Full interactive HTML report (per-file source view with line-by-line coverage highlighting)
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-report
-          path: coverage-report
-
-      - name: Upload coverage data
-        # Raw cobertura files for downstream jobs (e.g. the GitHub Pages publication in develop.yml)
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-data
-          path: tests/**/coverage.cobertura.xml
-
-      - name: Post coverage comment on PR
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        uses: marocchino/sticky-pull-request-comment@v3
-        with:
-          header: coverage
-          path: coverage-report/SummaryGithub.md
-
   # Builds the UWP Xbox Game Bar widget — only possible on Windows (VS UWP workload).
+  # This is the repo's only build: the shared business logic now lives in the separate, private
+  # OneZenBar.Core package (consumed via NuGet), so there is no cross-platform class library or
+  # test suite to build here anymore.
   # Produces one sideload .msixbundle containing the x86, x64 and ARM64 flavors, with the
   # appx version stamped from MinVer (StampPackageVersion). The bundle is SIGNED with the
   # self-signed dev certificate when the SIGNING_CERTIFICATE_* secrets are present (their
@@ -135,8 +64,8 @@ jobs:
           fetch-depth: 0
 
       - name: Setup .NET SDK
-        # The widget references OneZenBar.Core (SDK-style project): MSBuild resolves the .NET SDK
-        # pinned in global.json through the dotnet on PATH.
+        # The widget consumes the OneZenBar.Core package and queries OneZenBar.Version (SDK-style)
+        # for the appx version: MSBuild resolves the .NET SDK pinned in global.json via dotnet on PATH.
         # Skipped on the self-hosted runner: it already has the SDK (VS 2026), and setup-dotnet
         # cannot install into C:\Program Files\dotnet without admin. The machine must provide a
         # .NET 10 SDK >= 10.0.300 on PATH (global.json: 10.0.300, rollForward latestFeature).
@@ -149,7 +78,17 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Restore
-        run: msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+        # OneZenBar.Core is a PRIVATE package on GitHub Packages — nuget.config reads the credential
+        # from GH_PACKAGES_PAT (read:packages). The default GITHUB_TOKEN cannot read another
+        # repo's packages. Fork PRs have no access to this secret, so they cannot restore Core and
+        # this step fails for them — expected for an open-core repo with a closed dependency.
+        env:
+          GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }}
+        # Restore the version anchor too: StampAppxManifestVersion invokes MinVer on it at build
+        # time, and MinVer's targets only exist after a restore (MSB4057 otherwise).
+        run: |
+          msbuild src/OneZenBar.Version/OneZenBar.Version.csproj /t:Restore /verbosity:minimal
+          msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
       - name: Decode signing certificate
         if: env.CAN_SIGN == 'true'

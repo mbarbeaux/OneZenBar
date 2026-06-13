@@ -52,7 +52,15 @@ jobs:
         uses: microsoft/setup-msbuild@v3
 
       - name: Restore
-        run: msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
+        # OneZenBar.Core is a private GitHub Packages dependency — nuget.config reads the
+        # credential from GH_PACKAGES_PAT (read:packages); available here via secrets: inherit.
+        env:
+          GH_PACKAGES_PAT: ${{ secrets.GH_PACKAGES_PAT }}
+        # Restore the version anchor too: StampAppxManifestVersion invokes MinVer on it at build
+        # time, and MinVer's targets only exist after a restore (MSB4057 otherwise).
+        run: |
+          msbuild src/OneZenBar.Version/OneZenBar.Version.csproj /t:Restore /verbosity:minimal
+          msbuild src/OneZenBar.Widget/OneZenBar.Widget.csproj /t:Restore /p:Configuration=Release /verbosity:minimal
 
       - name: Build Store package (.msixupload)
         shell: pwsh

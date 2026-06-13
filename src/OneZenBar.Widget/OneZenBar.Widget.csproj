@@ -204,10 +204,13 @@
       <Version>6.2.9</Version>
     </PackageReference>
   </ItemGroup>
+  <!-- OneZenBar.Core is the closed-source business-logic library, consumed as a PRIVATE NuGet
+       package from GitHub Packages (see nuget.config). Pinned to a stable version to ship; bump
+       deliberately. Restoring it requires the GH_PACKAGES_PAT credential (read:packages). -->
   <ItemGroup>
-    <ProjectReference Include="..\OneZenBar.Core\OneZenBar.Core.csproj">
-      <Name>OneZenBar.Core</Name>
-    </ProjectReference>
+    <PackageReference Include="OneZenBar.Core">
+      <Version>0.1.0</Version>
+    </PackageReference>
   </ItemGroup>
   <PropertyGroup>
     <XboxGameBar-Platform Condition="'$(Platform)' == 'x86'">win32</XboxGameBar-Platform>
@@ -254,15 +257,16 @@
     <Message Importance="high" Text="Store identity injected into Package.appxmanifest (values masked)" />
   </Target>
   <!-- Stamps the appx package version from the MinVer-computed version (vX.Y.Z git tags created
-       by ShipIt). MinVer cannot run in this old-style project (MINVER0001), so the version is
-       queried from the SDK-style OneZenBar.Core via its ReportMinVerBaseVersion target (defined
-       in the root Directory.Build.props). Opt-in via /p:StampPackageVersion=true (used by CI
-       packaging) so local builds do not dirty Package.appxmanifest. The appx version must be
-       4 numeric parts with a zero revision (no prerelease suffix), hence Major.Minor.Patch.0. -->
+       by ShipIt on THIS repo). MinVer cannot run in this old-style project (MINVER0001), so the
+       version is queried from the tiny SDK-style OneZenBar.Version anchor project via its
+       ReportMinVerBaseVersion target (defined in the root Directory.Build.props). Opt-in via
+       /p:StampPackageVersion=true (used by CI packaging) so local builds do not dirty
+       Package.appxmanifest. The appx version must be 4 numeric parts with a zero revision (no
+       prerelease suffix), hence Major.Minor.Patch.0. -->
   <Target Name="StampAppxManifestVersion"
           BeforeTargets="BeforeBuild"
           Condition="'$(StampPackageVersion)' == 'true'">
-    <MSBuild Projects="..\OneZenBar.Core\OneZenBar.Core.csproj"
+    <MSBuild Projects="..\OneZenBar.Version\OneZenBar.Version.csproj"
              Targets="ReportMinVerBaseVersion"
              RemoveProperties="Platform;Configuration">
       <Output TaskParameter="TargetOutputs" ItemName="_MinVerBaseVersion" />
