@@ -1,4 +1,4 @@
-// Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
+// Copyright (C) 2026 Michael Barbeaux. Licensed under the MIT License. See the LICENSE file for details.
 
 using Microsoft.Gaming.XboxGameBar;
 using System;

@@ -30,7 +30,7 @@ dotnet_separate_import_directive_groups = true
 dotnet_sort_system_directives_first = true
 
 # Required license header (IDE0073 — build fails if missing, see Directory.Build.props)
-file_header_template = Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
+file_header_template = Copyright (C) 2026 Michael Barbeaux. Licensed under the MIT License. See the LICENSE file for details.
 dotnet_diagnostic.IDE0073.severity = error
 
 # this. and Me. preferences

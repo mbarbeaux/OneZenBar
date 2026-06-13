@@ -56,4 +56,4 @@ To build or run the widget itself, open `OneZenBar.slnx` in Visual Studio on Win
 
 ## License
 
-[GPL-3.0](LICENSE)
+[MIT](LICENSE)

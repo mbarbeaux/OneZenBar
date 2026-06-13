@@ -32,9 +32,9 @@ dotnet format         # Format code (the pre-commit hook runs this with --verify
 - Code style is defined in `.editorconfig` — always follow it. The pre-commit hook rejects staged `.cs`/`.vb` files that `dotnet format --verify-no-changes --severity error` would change; run `dotnet format` before committing.
 - **Encoding**: all text files are UTF-8 without BOM. Enforced at commit time by a Husky.Net pre-commit hook (`.husky/csx/check-encoding.csx`), installed automatically at first restore/build, or manually with `dotnet tool restore && dotnet husky install`.
 - **Line endings**: LF everywhere on every OS — normalized by `.gitattributes`, don't override it locally.
-- **License**: project is GPL-3.0-or-later. Every `.cs` file MUST start with this header (the build fails otherwise — rule IDE0073):
+- **License**: project is MIT-licensed (relicensed from GPL-3.0 for the open-core split — MIT is what legally allows linking the closed-source `OneZenBar.Core` package). Every `.cs` file MUST start with this header (the build fails otherwise — rule IDE0073):
   ```csharp
-  // Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
+  // Copyright (C) 2026 Michael Barbeaux. Licensed under the MIT License. See the LICENSE file for details.
   ```
   `dotnet format` automatically adds a missing header.
 - Add any new project to the solution: `dotnet sln add <path/Project.csproj>`

@@ -1,4 +1,4 @@
-// Copyright (C) 2026 Michael Barbeaux. Licensed under the GNU General Public License v3.0 or later. See the LICENSE file for details.
+// Copyright (C) 2026 Michael Barbeaux. Licensed under the MIT License. See the LICENSE file for details.
 
 // Verifies that every staged text file is UTF-8 encoded, without BOM.
 // Run by the pre-commit hook via Husky.Net: file paths arrive in Args (${staged}).
